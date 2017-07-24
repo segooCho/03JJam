@@ -1,0 +1,71 @@
+REST API Reference
+
+Endpoint: http://127.0.0.1:3000/
+
+관심 식당 찾기
+GET /restaurantSearch
+    Req.Query.Parameter
+        01.searchText                :   Text =>     검색어 (주소 & 상호)
+
+회원 가입
+POST /restaurantSignUp
+    Req.Body.Parameter
+        01.password                  :   Text =>     비밀번호
+        02.businessNumber            :   Text =>     사업자 번호
+        03.companyName               :   Text =>     상호
+        04.address                   :   Text =>     주소
+        05.contactNumber             :   Text =>     연락처
+        06.representative            :   Text =>     대표자
+        07.certification             :   Text =>     승인(y,n) *기본:n 
+        08.businessLicenseImage      :   File =>     사업자 등록증 사진
+
+
+오늘의 식단
+GET /mealSearch
+    Req.Query.Parameter
+        01.restaurant_Id             :   Text =>     식당_id
+        02.dateString                :   Text =>     날짜
+        03.segmentedId               :   Text =>     오늘 식단(0):오늘 만 전체, 
+                                                     계회 식단(1):오늘 이후 전체 , 
+                                                     과거 식단(2):오늘 이전 30일
+
+오늘의 식단 : 다중 처리(인증, 공지사항, 식단)
+GET /businessUsersMealSearch
+    Req.Query.Parameter
+        01.restaurant_Id             :   Text =>     식당_id
+        02.dateString                :   Text =>     날짜
+        03.segmentedId               :   Text =>     오늘 식단(0):오늘 만 전체, 
+                                                     계회 식단(1):오늘 이후 전체 , 
+                                                     과거 식단(2):오늘 이전 30일
+
+식단 등록
+POST /mealWrite
+    Req.Query.Parameter
+        01.restaurant_Id             :   Text =>     식당_id
+        02.dateString                :   Text =>     날짜
+        03.division                  :   Text =>     구분(아침,점심,저녁)
+        04.stapleFood                :   Text =>     주식(밥,면)
+        05.soup                      :   Text =>     국
+        06.sideDish1                 :   Text =>     반찬1
+        07.sideDish2                 :   Text =>     반찬2
+        08.sideDish3                 :   Text =>     반찬3
+        09.sideDish4                 :   Text =>     반찬4
+        10.dessert                   :   Text =>     후식
+        11.remarks                   :   Text =>     비고
+        12.foodImage                 :   File =>     사진용
+
+
+
+식당 공지 찾기
+GET /restaurantNoticeSearch
+    Req.Query.Parameter
+        01.restaurant_Id             :   Text =>     식당_id
+
+
+식당 공지 등록(1개만 사)
+POST /restaurantNoticeEdit
+    Req.Query.Parameter
+        01.restaurant_Id             :   Text =>     식당_id
+        02.notice                    :   Text =>     공지사항
+
+
