@@ -4,8 +4,11 @@ var Schema = mongoose.Schema;
 
 var MealSchema = new Schema({
     restaurant_Id   : String,
-    dateString      : String,
+    mealDate        : String,
+    mealDateLabel   : String,
+    location        : String,
     division        : String,
+    sort            : String,
     stapleFood      : String,
     soup            : String,
     sideDish1       : String,

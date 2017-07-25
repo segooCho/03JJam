@@ -28,7 +28,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 
-/* GET : 관심 식당 찾기 */
+/* GET : 식당 찾기 */
 router.get('/restaurantSearch', function(req, res){
     console.log(req.query.searchText);
     var testJson;
@@ -39,40 +39,6 @@ router.get('/restaurantSearch', function(req, res){
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-
-                httpMsgs.sendJson(req, res, data);
-                
-                /*
-                testJson =  
-                                {"'_id'": "59719bd1aac67b1171fb460a",
-                                "companyName": "벽산",
-                                "address": " 경기도 성남시 중원구 둔촌대로 549 벽산밸리 101호",
-                                "contactNumber": "031-111-2222",
-                                "representative": "벽산",
-                                "certification": "y"}
-                            ;
-
-                httpMsgs.sendJson(req, res, testJson);
-                */
-                
-            } else {
-                httpMsgs.sendNoDataFound(req, res);
-            }
-        }        
-    });
-});
-
-/* GET : 오늘의 식단 */
-router.get('/mealSearch', function(req, res){
-    //console.log(req.query.searchText);
-    //segmentedId 처리 필요
-    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id},{dateString:req.query.dateString}]}
-            ,{created_at:0, __v:0, restaurant_Id:0}
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);
             } else {
                 httpMsgs.sendNoDataFound(req, res);
@@ -81,52 +47,76 @@ router.get('/mealSearch', function(req, res){
     });
 });
 
-/* GET : 오늘의 식단: 다중 처리 */
-router.get('/businessUsersMealSearch', function(req, res){
-    //인증 
-    var certification;
+/* GET : 식당 인증 */
+router.get('/restaurantCertification', function(req, res){
     Restaurant.find({_id:req.query.restaurant_Id}
             ,{_id:0, certification:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
-            //인증 값은 항상 존재 (y,n)            
-            certification = data;
-            //certification = [{'certification':'n'}];
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                httpMsgs.sendNoDataFound(req, res);
+            }
         }        
     });
+});
 
-    //식당 공지
-    var restaurantNotice;
+/* GET : 식당 공지 사항 */
+router.get('/restaurantNotice', function(req, res){
     RestaurantNotice.find({restaurant_Id:req.query.restaurant_Id}
             , {_id:0, notice:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
-            //공지 값은 항상 존재 (y,n)            
-            restaurantNotice = data;
-            //restaurantNotice = [{'notice':'등록된 공지 사항이 없습니다.'}];
-        }        
-    });
-
-    //TODO: segmentedId 처리 필요
-    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id},{dateString:req.query.dateString}]}
-            ,{created_at:0, __v:0, restaurant_Id:0}
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
             if (data.length>0) {
-                data.push(certification);              //인증
-                data.push(restaurantNotice);          //공지 사항
-                httpMsgs.sendJson(req, res, data);      //식단
+                httpMsgs.sendJson(req, res, data);      
             } else {
                 httpMsgs.sendNoDataFound(req, res);
             }
         }        
     });
+});
+
+/* GET : 식단 조회 */
+router.get('/mealSearch', function(req, res){
+    //날짜 가져오기
+    var date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+    var today = year + "-" + month + "-" + day
+
+    //segmentedId 구분 처리
+    var dateQuery = {};
+    if (req.query.segmentedId  == 0) {
+        dateQuery = {mealDate:{$eq:today}};      //오늘
+    } else if (req.query.segmentedId  == 1) {
+        dateQuery = {mealDate:{$gt:today}};      //계획
+    } else if (req.query.segmentedId  == 2) {
+        dateQuery = {mealDate:{$lt:today}};      //과거
+    }
+    //console.log(dateQuery);
+
+    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id},dateQuery]}
+            ,{created_at:0, __v:0, restaurant_Id:0}
+            ,{}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                httpMsgs.sendNoDataFound(req, res);
+            }
+        }        
+    }).sort({"mealDate":1,"location":1,"sort":1,"division":1}); //-1:내림 차순, 1:오늘 차순
 });
 
 /* GET : 식당 공지 찾기 */
@@ -183,10 +173,36 @@ router.post('/restaurantSignUp', upload.single('businessLicenseImage'), function
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     //console.log(req.body);
+
+    //요일 찾기
+    var weekName = new Array('일','월','화','수','목','금','토'); 
+    var year = req.body.mealDate.substring(0,4);
+    var month = req.body.mealDate.substring(5,7);
+    var day = req.body.mealDate.substring(8,10);
+    var week = new Date(year, month-1, day, 0,0,0,0);               //month는 0~11까지임 
+    week = weekName[week.getDay()]; 
+  
+    //아침,점심,저녁으로 구분
+    var sort
+    if (req.body.division.indexOf('아침') > -1) {
+        sort = 0
+    } else if (req.body.division.indexOf('점심') > -1) {
+        sort = 1
+    } else if (req.body.division.indexOf('저녁') > -1) {
+        sort = 2
+    } else {
+        sort = 4
+    }
+
+
+
     var meal = new Meal({
         restaurant_Id   : req.body.restaurant_Id,
-        dateString      : req.body.dateString,
+        mealDate        : req.body.mealDate,
+        mealDateLabel   : week,
+        location        : req.body.location,
         division        : req.body.division,
+        sort            : sort,
         stapleFood      : req.body.stapleFood,
         soup            : req.body.soup,
         sideDish1       : req.body.sideDish1,
