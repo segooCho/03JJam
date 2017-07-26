@@ -117,6 +117,7 @@ router.get('/mealSearch', function(req, res){
     }).sort({"mealDate":1,"location":1,"sort":1,"division":1}); //-1:내림 차순, 1:오늘 차순
 });
 
+
 /* GET : 회원 가입 ID 확인 (회원 아이디 중복 확인용)*/
 router.get('/restaurantId', function(req, res){
     Restaurant.find({id:req.query.id}
@@ -126,10 +127,10 @@ router.get('/restaurantId', function(req, res){
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                httpMsgs.sendJson(req, res, data);      
-            } else {
-                var msg = "이미 존대하는 id 입니다."
+                var msg = "이미 존재하는 id 입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
+            } else {
+                httpMsgs.sendNoDataFound(req, res);
             }
         }        
     });
@@ -139,9 +140,11 @@ router.get('/restaurantId', function(req, res){
 
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    // 식당 등록
-    var hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
-    //console.log('hashed: ' , hash);
+    // 식당 등록 : (sha256 : swift 가 Hex만 지원)
+    var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
+    console.log('hashed: ' , hash);
+
+
     var restaurant = new Restaurant({
         id                      : req.body.id,
         password                : hash,
@@ -235,7 +238,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     });
 });
 
-/* POST : 식단 공지 */
+/* POST : 식단 공지 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     //console.log(req.body);
@@ -249,4 +252,37 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     });
 });
 
+/* POST : 로그인 */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantLogin', upload.single(), function(req, res){
+    //사용자 ID 검사
+    Restaurant.find({id:req.body.id}
+            , {}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                //패스워드 검사
+                Restaurant.find({$and:[{id:req.body.id},{password:req.body.password}]}
+                        , {_id:0, id:1}
+                        , function(err, data){
+                    if (err) {
+                        httpMsgs.show500(req, res, err);
+                    } else {
+                        if (data.length>0) {
+                            httpMsgs.sendJson(req, res, data);      
+                        } else {
+                            var msg = "패스워드가 잘못되었습니다."
+                            httpMsgs.sendMessageFound(req, res, msg);
+                        }
+                    }        
+                });
+            } else {
+                var msg = "존재하는 않는 사용자ID 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
+    });
+});
 module.exports = router;

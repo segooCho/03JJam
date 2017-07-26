@@ -20,10 +20,14 @@ GET /restaurantInfo
 GET /mealSearch
     Req.Query.Parameter
         01.restaurant_Id             :   Text =>     식당_id
-        03.segmentedId               :   Text =>     오늘 식단(0):오늘 만   
+        02.segmentedId               :   Text =>     오늘 식단(0):오늘 만   
                                                      계회 식단(1):오늘 이후  
                                                      과거 식단(2):오늘 이전 
-
+로그인
+POST /restaurantLogin
+    Req.body.Parameter
+        01.id                       :   Text =>     사용자 id
+        02.password                 :   Text =>     패스워스(hash sha-256)
 
 
 
