@@ -43,7 +43,7 @@ jspm_packages/
 typings/
 
 # image
-.jpeg
+*.jpeg
 
 # Optional npm cache directory
 .npm
