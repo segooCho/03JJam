@@ -13,14 +13,15 @@ GET /restaurantSearch
 회원 가입
 POST /restaurantSignUp
     Req.Body.Parameter
-        01.password                  :   Text =>     비밀번호
-        02.businessNumber            :   Text =>     사업자 번호
-        03.companyName               :   Text =>     상호
-        04.address                   :   Text =>     주소
-        05.contactNumber             :   Text =>     연락처
-        06.representative            :   Text =>     대표자
-        07.certification             :   Text =>     승인(y,n) *기본:n 
-        08.businessLicenseImage      :   File =>     사업자 등록증 사진
+        01.id                        :   Text =>     id
+        02.password                  :   Text =>     비밀번호
+        03.businessNumber            :   Text =>     사업자 번호
+        04.companyName               :   Text =>     상호
+        05.address                   :   Text =>     주소
+        06.contactNumber             :   Text =>     연락처
+        07.representative            :   Text =>     대표자
+        08.certification             :   Text =>     승인(y,n) *기본:n 
+        09.businessLicenseImage      :   File =>     사업자 등록증 사진
 
 
 식당 인증

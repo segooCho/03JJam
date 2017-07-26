@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 //var autoIncrement = require('mongoose-auto-increment');
 
 var RestaurantSchema = new Schema({
+    id                      : String,
     password                : String,
     businessNumber          : String,
     companyName             : String,

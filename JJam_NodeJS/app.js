@@ -38,6 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //업로드 path 추가
 app.use('/uploads', express.static('uploads'));
+app.use('/uploadsSignUp', express.static('uploadsSignUp'));
 
 app.use('/', appServer);
 

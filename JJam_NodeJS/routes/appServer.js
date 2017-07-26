@@ -6,6 +6,8 @@ var Restaurant = require('../models/Restaurant');
 var Meal = require('../models/Meal');
 var RestaurantNotice = require('../models/RestaurantNotice');
 
+//hash
+var crypto = require('crypto');
 
 // Return Page
 var httpMsgs = require('../views/appJJam/httpMsgs.js');
@@ -13,10 +15,23 @@ var httpMsgs = require('../views/appJJam/httpMsgs.js');
 // 파일 저장되는 위치 설정
 var path = require('path');
 var uploadDir = path.join( __dirname , '../uploads' );
+var uploadSignUpDir = path.join( __dirname , '../uploadsSignUp' );
 var fs = require('fs');
 
- //multer 셋팅
+//multer 셋팅
 var multer  = require('multer');
+//회원 가입 이미지
+var storageSignUp = multer.diskStorage({
+    destination : function (req, file, callback) {
+        callback(null, uploadSignUpDir );
+    },
+    filename : function (req, file, callback) {
+        callback(null, 'file-' + Date.now() + '.'+ file.mimetype.split('/')[1] );
+    }
+});
+var uploadSignUp = multer({ storage: storageSignUp });
+
+//식단 저장 이미지
 var storage = multer.diskStorage({
     destination : function (req, file, callback) {
         callback(null, uploadDir );
@@ -58,7 +73,8 @@ router.get('/restaurantCertification', function(req, res){
             if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);      
             } else {
-                httpMsgs.sendNoDataFound(req, res);
+                var msg = "선택된 식당은 탈퇴한 상태입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
             }
         }        
     });
@@ -119,18 +135,19 @@ router.get('/mealSearch', function(req, res){
     }).sort({"mealDate":1,"location":1,"sort":1,"division":1}); //-1:내림 차순, 1:오늘 차순
 });
 
-/* GET : 식당 공지 찾기 */
-router.get('/restaurantNoticeSearch', function(req, res){
-    RestaurantNotice.find({restaurant_Id:req.query.restaurant_Id}
-            ,{_id:0, notice:1}
+/* GET : 회원 가입 ID 확인 (회원 아이디 중복 확인용)*/
+router.get('/restaurantId', function(req, res){
+    RestaurantNotice.find({id:req.query.id}
+            , {_id:0, id:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                httpMsgs.sendJson(req, res, data);
+                httpMsgs.sendJson(req, res, data);      
             } else {
-                httpMsgs.sendNoDataFound(req, res);
+                var msg = "이미 존대하는 id 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
             }
         }        
     });
@@ -139,11 +156,13 @@ router.get('/restaurantNoticeSearch', function(req, res){
 /*==============================================================================================*/
 
 /* POST : 회원 가입 */
-router.post('/restaurantSignUp', upload.single('businessLicenseImage'), function(req, res){
-    //console.log(req.body);
+router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
     // 식당 등록
+    var hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
+    //console.log('hashed: ' , hash);
     var restaurant = new Restaurant({
-        password                : req.body.password,
+        id                      : req.body.id,
+        password                : hash,
         businessNumber          : req.body.businessNumber,
         companyName             : req.body.companyName,
         address                 : req.body.address,
@@ -152,22 +171,36 @@ router.post('/restaurantSignUp', upload.single('businessLicenseImage'), function
         certification           : req.body.certification,
         businessLicenseImage    : (req.file) ? req.file.filename : ""
     });
-    restaurant.save(function(err){
-        httpMsgs.sendNoDataFound(req, res);
-        /*TODO : restaurant_Id 받아 오기
+
+    restaurant.save(function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        }
+        //console.log('data._id : ', data._id);
+        var restaurant_Id = data._id
+        //console.log('restaurant_Id : ', restaurant_Id);
+
         // 식당 등록
         var tmpNotice = "공지사항"
         var restaurantNotice = new RestaurantNotice({
-            restaurant_Id   : req.body.restaurant_Id,
+            restaurant_Id   : restaurant_Id,
             notice          : tmpNotice
         });
         restaurantNotice.save(function(err){
-            httpMsgs.sendNoDataFound(req, res);
+            if (err) {
+                httpMsgs.show500(req, res, err);
+            }       
         });
-        */
-        // 기본 메뉴 등록
 
     });
+
+    //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁)
+    // 기본 메뉴 등록
+    // Location
+    // 구분
+
+    httpMsgs.sendNoDataFound(req, res);
+
 });
 
 /* POST : 식단 등록 */
@@ -193,8 +226,6 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     } else {
         sort = 4
     }
-
-
 
     var meal = new Meal({
         restaurant_Id   : req.body.restaurant_Id,
@@ -225,7 +256,7 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     RestaurantNotice.findOne({restaurant_Id:req.body.restaurant_Id}, function(err, data){
         if (data.notice == "") {
             //기존 등록된 공지가 없다면 Save       
-            console.log("Save");
+            //console.log("Save");
             var restaurantNotice = new RestaurantNotice({
                 restaurant_Id   : req.body.restaurant_Id,
                 notice          : req.body.notice,
@@ -236,7 +267,7 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 
         } else {
             //기존 등록된 공지가 있다면 Update        
-            console.log("Update");
+            //console.log("Update");
             var query = {
                 notice : req.body.notice
             };
