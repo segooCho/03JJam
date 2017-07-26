@@ -12,6 +12,7 @@ var RestaurantSchema = new Schema({
     representative          : String,
     certification           : String,
     businessLicenseImage    : String,
+    notice                  : String,
     created_at : {
         type                : Date,
         default             : Date.now()

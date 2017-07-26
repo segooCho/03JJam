@@ -4,7 +4,6 @@ var router = express.Router();
 // Model
 var Restaurant = require('../models/Restaurant');
 var Meal = require('../models/Meal');
-var RestaurantNotice = require('../models/RestaurantNotice');
 
 //hash
 var crypto = require('crypto');
@@ -62,10 +61,10 @@ router.get('/restaurantSearch', function(req, res){
     });
 });
 
-/* GET : 식당 인증 */
-router.get('/restaurantCertification', function(req, res){
+/* GET : 식당 인증 & 공지사항 */
+router.get('/restaurantInfo', function(req, res){
     Restaurant.find({_id:req.query.restaurant_Id}
-            ,{_id:0, certification:1}
+            ,{_id:0, certification:1, notice:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -75,23 +74,6 @@ router.get('/restaurantCertification', function(req, res){
             } else {
                 var msg = "선택된 식당은 탈퇴한 상태입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
-            }
-        }        
-    });
-});
-
-/* GET : 식당 공지 사항 */
-router.get('/restaurantNotice', function(req, res){
-    RestaurantNotice.find({restaurant_Id:req.query.restaurant_Id}
-            , {_id:0, notice:1}
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            if (data.length>0) {
-                httpMsgs.sendJson(req, res, data);      
-            } else {
-                httpMsgs.sendNoDataFound(req, res);
             }
         }        
     });
@@ -137,7 +119,7 @@ router.get('/mealSearch', function(req, res){
 
 /* GET : 회원 가입 ID 확인 (회원 아이디 중복 확인용)*/
 router.get('/restaurantId', function(req, res){
-    RestaurantNotice.find({id:req.query.id}
+    Restaurant.find({id:req.query.id}
             , {_id:0, id:1}
             , function(err, data){
         if (err) {
@@ -169,7 +151,8 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
         contactNumber           : req.body.contactNumber,
         representative          : req.body.representative,
         certification           : req.body.certification,
-        businessLicenseImage    : (req.file) ? req.file.filename : ""
+        businessLicenseImage    : (req.file) ? req.file.filename : "",
+        notice                  : "공지사항",
     });
 
     restaurant.save(function(err, data){
@@ -179,7 +162,8 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
         //console.log('data._id : ', data._id);
         var restaurant_Id = data._id
         //console.log('restaurant_Id : ', restaurant_Id);
-
+        
+        /*
         // 식당 등록
         var tmpNotice = "공지사항"
         var restaurantNotice = new RestaurantNotice({
@@ -191,13 +175,15 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
                 httpMsgs.show500(req, res, err);
             }       
         });
+        */
+
+        //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁)
+        // 기본 메뉴 등록
+        // Location
+        // 구분
 
     });
 
-    //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁)
-    // 기본 메뉴 등록
-    // Location
-    // 구분
 
     httpMsgs.sendNoDataFound(req, res);
 
@@ -252,33 +238,15 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 /* POST : 식단 공지 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
-    console.log(req.body);
-    RestaurantNotice.findOne({restaurant_Id:req.body.restaurant_Id}, function(err, data){
-        if (data.notice == "") {
-            //기존 등록된 공지가 없다면 Save       
-            //console.log("Save");
-            var restaurantNotice = new RestaurantNotice({
-                restaurant_Id   : req.body.restaurant_Id,
-                notice          : req.body.notice,
-            });
-            restaurantNotice.save(function(err){
-                httpMsgs.sendNoDataFound(req, res);
-            });
+    //console.log(req.body);
+    var query = {
+        notice : req.body.notice
+    };
 
-        } else {
-            //기존 등록된 공지가 있다면 Update        
-            //console.log("Update");
-            var query = {
-                notice : req.body.notice
-            };
-
-            RestaurantNotice.update( {restaurant_Id : req.body.restaurant_Id }, { $set : query },
-            function(err){
-                httpMsgs.sendNoDataFound(req, res);
-            });
-        }
+    Restaurant.update( {restaurant_Id : req.body.restaurant_Id }, { $set : query },
+    function(err){
+        httpMsgs.sendNoDataFound(req, res);
     });
-
 });
 
 module.exports = router;
