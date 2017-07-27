@@ -3,17 +3,21 @@
 1. 경로 생성
 2. 경로 이동
 
-*package.json 어찌 만들지???
+3. express 설치(글로벌로 한번 만 설치)
+npm –g install express
+npm -g install express-generator
 
-3. npm install express => 기본 파일 세팅
-4. npm install express-generator
-5. npm install =>  모듈 세팅
+4. express => package 등 기본 파일이 세팅됨
+5. npm install =>  모듈 세팅됨
 6. npm start
 7. 127.0.0.1:3000 => 확인
 
 
 * mongodb 설치(문서화 필요) 완료
+* 문서 4번 70번 페이지 부터 적용
 1. mongod
+
+
 
 * robomongo(mongodb UI 모니터링 툴) 설치 완료
 
@@ -44,9 +48,9 @@
 
 
 ================================= Bat =================================
-npm install express
-npm install express-generator
-
+npm –g install express
+npm -g install express-generator
+express
 npm install
 npm install --save mongodb
 npm install --save mongoose
@@ -54,3 +58,4 @@ npm install --save mongoose-auto-increment
 npm install nodemon
 npm install -save multer
 npm install crypto
+
