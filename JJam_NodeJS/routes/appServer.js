@@ -91,17 +91,25 @@ router.get('/mealSearch', function(req, res){
     var today = year + "-" + month + "-" + day
 
     //segmentedId 구분 처리
-    var dateQuery = {};
+    //dateQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함
+    var dateQuery1 = {};
+    var dateQuery2 = {};
     if (req.query.segmentedId  == 0) {
-        dateQuery = {mealDate:{$eq:today}};      //오늘
+        dateQuery1 = {mealDate:{$eq:today}};             //오늘
+        dateQuery2 = {sort:{$ne:3}};                    //sort
     } else if (req.query.segmentedId  == 1) {
-        dateQuery = {mealDate:{$gt:today}};      //계획
+        dateQuery1 = {mealDate:{$gt:today}};             //계획
+        dateQuery2 = {sort:{$ne:3}};                    //sort
     } else if (req.query.segmentedId  == 2) {
-        dateQuery = {mealDate:{$lt:today}};      //과거
+        dateQuery1 = {mealDate:{$lt:today}};             //과거
+        dateQuery2 = {sort:{$ne:3}};                    //sort
+    } else if (req.query.segmentedId  == 3) {
+        dateQuery1 = {sort:3};                          //사진식단
+        dateQuery2 = {sort:3};                          //sort
     }
-    //console.log(dateQuery);
+    //console.log(dateQuery1);
 
-    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id},dateQuery]}
+    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id}, dateQuery1, dateQuery2]}
             ,{created_at:0, __v:0, restaurant_Id:0}
             ,{}
             , function(err, data){
@@ -114,7 +122,10 @@ router.get('/mealSearch', function(req, res){
                 httpMsgs.sendNoDataFound(req, res);
             }
         }        
-    }).sort({"mealDate":1,"location":1,"sort":1,"division":1}); //-1:내림 차순, 1:오늘 차순
+    })
+    .sort({"mealDate":1,"location":1,"sort":1,"division":1})    //-1:내림 차순, 1:오늘 차순
+    .limit(30)                                                  //제한 30
+    ;
 });
 
 
@@ -127,7 +138,7 @@ router.get('/restaurantId', function(req, res){
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                var msg = "이미 존재하는 id 입니다."
+                var msg = "이미 존재하는 사용자ID 입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
             } else {
                 httpMsgs.sendNoDataFound(req, res);
@@ -180,7 +191,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
         });
         */
 
-        //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁)
+        //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁,사진식단)
         // 기본 메뉴 등록
         // Location
         // 구분
@@ -213,7 +224,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     } else if (req.body.division.indexOf('저녁') > -1) {
         sort = 2
     } else {
-        sort = 4
+        sort = 3
     }
 
     var meal = new Meal({
@@ -273,12 +284,14 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
                         if (data.length>0) {
                             httpMsgs.sendJson(req, res, data);      
                         } else {
+                            //로그인 msg 멘트 변경시 iOS 수정 필요
                             var msg = "패스워드가 잘못되었습니다."
                             httpMsgs.sendMessageFound(req, res, msg);
                         }
                     }        
                 });
             } else {
+                //로그인 msg 멘트 변경시 iOS 수정 필요
                 var msg = "존재하는 않는 사용자ID 입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
             }
