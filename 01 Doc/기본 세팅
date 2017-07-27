@@ -2,10 +2,14 @@
 
 1. 경로 생성
 2. 경로 이동
+
+*package.json 어찌 만들지???
+
 3. npm install express => 기본 파일 세팅
-4. npm install =>  모듈 세팅
-5. npm start
-6. 127.0.0.1:3000 => 확인
+4. npm install express-generator
+5. npm install =>  모듈 세팅
+6. npm start
+7. 127.0.0.1:3000 => 확인
 
 
 * mongodb 설치(문서화 필요) 완료
@@ -37,3 +41,16 @@
 * XSS, CSRF 보안 처리 필요 (lecture_6)
 * passport (lecture_7)
 * session 
+
+
+================================= Bat =================================
+npm install express
+npm install express-generator
+
+npm install
+npm install --save mongodb
+npm install --save mongoose
+npm install --save mongoose-auto-increment
+npm install nodemon
+npm install -save multer
+npm install crypto
