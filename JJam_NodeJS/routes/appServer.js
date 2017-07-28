@@ -55,7 +55,8 @@ router.get('/restaurantSearch', function(req, res){
             if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);
             } else {
-                httpMsgs.sendNoDataFound(req, res);
+                var msg = "검색된 식당 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
             }
         }        
     });
@@ -148,59 +149,75 @@ router.get('/restaurantId', function(req, res){
 });
 
 /*==============================================================================================*/
-
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    // 식당 등록 : (sha256 : swift 가 Hex만 지원)
-    var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
-    console.log('hashed: ' , hash);
+    //회원 가입 ID 확인
+    console.log('req.body.id' , req.body.id); 
 
-
-    var restaurant = new Restaurant({
-        id                      : req.body.id,
-        password                : hash,
-        businessNumber          : req.body.businessNumber,
-        companyName             : req.body.companyName,
-        address                 : req.body.address,
-        contactNumber           : req.body.contactNumber,
-        representative          : req.body.representative,
-        certification           : req.body.certification,
-        businessLicenseImage    : (req.file) ? req.file.filename : "",
-        notice                  : "공지사항",
-    });
-
-    restaurant.save(function(err, data){
+    Restaurant.find({id:req.body.id}
+            , {}
+            , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
-        }
-        //console.log('data._id : ', data._id);
-        var restaurant_Id = data._id
-        //console.log('restaurant_Id : ', restaurant_Id);
-        
-        /*
-        // 식당 등록
-        var tmpNotice = "공지사항"
-        var restaurantNotice = new RestaurantNotice({
-            restaurant_Id   : restaurant_Id,
-            notice          : tmpNotice
-        });
-        restaurantNotice.save(function(err){
-            if (err) {
-                httpMsgs.show500(req, res, err);
-            }       
-        });
-        */
+        } else {
+            if (data.length>0) {
 
-        //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁,사진식단)
-        // 기본 메뉴 등록
-        // Location
-        // 구분
+                var msg = "이미 존재하는 사용자ID 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
 
+            } else {
+                // 식당 등록 : (sha256 : swift 가 Hex만 지원)
+                var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
+                //console.log('hashed: ' , hash);
+
+                var restaurant = new Restaurant({
+                    id                      : req.body.id,
+                    password                : hash,
+                    businessNumber          : req.body.businessNumber,
+                    companyName             : req.body.companyName,
+                    address                 : req.body.address,
+                    contactNumber           : req.body.contactNumber,
+                    representative          : req.body.representative,
+                    certification           : 'n',
+                    businessLicenseImage    : (req.file) ? req.file.filename : "",
+                    notice                  : "공지사항",
+                });
+
+                restaurant.save(function(err, data){
+                    if (err) {
+                        httpMsgs.show500(req, res, err);
+                    }
+                    //console.log('data._id : ', data._id);
+                    var restaurant_Id = data._id
+                    //console.log('restaurant_Id : ', restaurant_Id);
+                    
+                    /*
+                    // 식당 등록
+                    var tmpNotice = "공지사항"
+                    var restaurantNotice = new RestaurantNotice({
+                        restaurant_Id   : restaurant_Id,
+                        notice          : tmpNotice
+                    });
+                    restaurantNotice.save(function(err){
+                        if (err) {
+                            httpMsgs.show500(req, res, err);
+                        }       
+                    });
+                    */
+
+                    //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁,사진식단)
+                    // 기본 메뉴 등록
+                    // Location
+                    // 구분
+
+                });
+
+                //msg 멘트 변경시 iOS 수정 필요
+                var msg = "회원 가입이 완료되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
     });
-
-
-    httpMsgs.sendNoDataFound(req, res);
-
 });
 
 /* POST : 식단 등록 */
