@@ -41,6 +41,10 @@ npm -g install express-generator
 1. npm install crypto
 
 
+* sleep (Test 용)
+npm install system-sleep
+
+
 ================================= 미처리 =================================
 * XSS, CSRF 보안 처리 필요 (lecture_6)
 * passport (lecture_7)

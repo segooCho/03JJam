@@ -27,7 +27,7 @@ GET /mealSearch
 POST /restaurantLogin
     Req.body.Parameter
         01.id                       :   Text =>     사용자 id
-        02.password                 :   Text =>     패스워스(hash sha-256)
+        02.password                 :   Text =>     패스워스(hash: sha-256 digest(Hex)
 
 
 
@@ -37,14 +37,16 @@ POST /restaurantLogin
 POST /restaurantSignUp
     Req.Body.Parameter
         01.id                        :   Text =>     id
-        02.password                  :   Text =>     비밀번호(서버에서 Hash 처리)
+        02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
         03.businessNumber            :   Text =>     사업자 번호
         04.companyName               :   Text =>     상호
         05.address                   :   Text =>     주소
         06.contactNumber             :   Text =>     연락처
         07.representative            :   Text =>     대표자
-        08.certification             :   Text =>     승인(y,n) *기본:n 
-        09.businessLicenseImage      :   File =>     사업자 등록증 사진
+        08.businessLicenseImage      :   File =>     사업자 등록증 사진
+      =>certification   : 서버에서 처리 'n'
+      =>notice          : 서버에서 처리 '공지사항'
+
 
 
 
@@ -66,7 +68,6 @@ POST /mealWrite
         11.remarks                   :   Text =>     비고
         12.foodImage                 :   File =>     사진용
       =>sort    : division의 문자열 중 '아침,점심,저녁' 을 이용하여 서버에서 처리
-      =>notice  : 서버에서 처리 '공지사항'
 
 
 

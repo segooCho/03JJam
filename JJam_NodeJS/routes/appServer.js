@@ -1,14 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
-// Model
+// model
 var Restaurant = require('../models/Restaurant');
 var Meal = require('../models/Meal');
-
-//hash
+// hash
 var crypto = require('crypto');
-
-// Return Page
+// sleep
+var sleep = require('system-sleep');
+// return Page
 var httpMsgs = require('../views/appJJam/httpMsgs.js');
 
 // 파일 저장되는 위치 설정
@@ -44,6 +44,8 @@ var upload = multer({ storage: storage });
 
 /* GET : 식당 찾기 */
 router.get('/restaurantSearch', function(req, res){
+    sleep(2000);
+
     console.log(req.query.searchText);
     var testJson;
     Restaurant.find({$or:[{companyName:{$regex:req.query.searchText}},{address:{$regex:req.query.searchText}}]}
@@ -64,6 +66,8 @@ router.get('/restaurantSearch', function(req, res){
 
 /* GET : 식당 인증 & 공지사항 */
 router.get('/restaurantInfo', function(req, res){
+    sleep(1000);
+
     Restaurant.find({_id:req.query.restaurant_Id}
             ,{_id:0, certification:1, notice:1}
             , function(err, data){
@@ -82,6 +86,8 @@ router.get('/restaurantInfo', function(req, res){
 
 /* GET : 식단 조회 */
 router.get('/mealSearch', function(req, res){
+    sleep(2000);
+
     //날짜 가져오기
     var date = new Date();
     var year = date.getFullYear();
@@ -92,21 +98,26 @@ router.get('/mealSearch', function(req, res){
     var today = year + "-" + month + "-" + day
 
     //segmentedId 구분 처리
-    //dateQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함
+    //dateQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함용
     var dateQuery1 = {};
     var dateQuery2 = {};
+    var msgSegmented = ""
     if (req.query.segmentedId  == 0) {
         dateQuery1 = {mealDate:{$eq:today}};             //오늘
         dateQuery2 = {sort:{$ne:3}};                    //sort
+        msgSegmented = "오늘"
     } else if (req.query.segmentedId  == 1) {
         dateQuery1 = {mealDate:{$gt:today}};             //계획
         dateQuery2 = {sort:{$ne:3}};                    //sort
+        msgSegmented = "계획"
     } else if (req.query.segmentedId  == 2) {
         dateQuery1 = {mealDate:{$lt:today}};             //과거
         dateQuery2 = {sort:{$ne:3}};                    //sort
+        msgSegmented = "과거"
     } else if (req.query.segmentedId  == 3) {
         dateQuery1 = {sort:3};                          //사진식단
         dateQuery2 = {sort:3};                          //sort
+        msgSegmented = "사진"
     }
     //console.log(dateQuery1);
 
@@ -120,7 +131,9 @@ router.get('/mealSearch', function(req, res){
             if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);      
             } else {
-                httpMsgs.sendNoDataFound(req, res);
+                var msg = msgSegmented + " 식단 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+                //httpMsgs.sendNoDataFound(req, res);
             }
         }        
     })
@@ -130,28 +143,12 @@ router.get('/mealSearch', function(req, res){
 });
 
 
-/* GET : 회원 가입 ID 확인 (회원 아이디 중복 확인용)*/
-router.get('/restaurantId', function(req, res){
-    Restaurant.find({id:req.query.id}
-            , {_id:0, id:1}
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            if (data.length>0) {
-                var msg = "이미 존재하는 사용자ID 입니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            } else {
-                httpMsgs.sendNoDataFound(req, res);
-            }
-        }        
-    });
-});
-
 /*==============================================================================================*/
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    //회원 가입 ID 확인
+    sleep(2000);
+
+    //회원 가입 ID 확인 (회원 아이디 중복 확인용)
     console.log('req.body.id' , req.body.id); 
 
     Restaurant.find({id:req.body.id}
@@ -161,25 +158,24 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-
                 var msg = "이미 존재하는 사용자ID 입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
 
             } else {
                 // 식당 등록 : (sha256 : swift 가 Hex만 지원)
-                var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
+                //var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
                 //console.log('hashed: ' , hash);
-
+                console.log('password: ' , req.body.password);
                 var restaurant = new Restaurant({
                     id                      : req.body.id,
-                    password                : hash,
+                    password                : req.body.password,
                     businessNumber          : req.body.businessNumber,
                     companyName             : req.body.companyName,
                     address                 : req.body.address,
                     contactNumber           : req.body.contactNumber,
                     representative          : req.body.representative,
-                    certification           : 'n',
                     businessLicenseImage    : (req.file) ? req.file.filename : "",
+                    certification           : 'n',
                     notice                  : "공지사항",
                 });
 
@@ -222,8 +218,9 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    //console.log(req.body);
+    sleep(2000);
 
+    //console.log(req.body);
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
     var year = req.body.mealDate.substring(0,4);
@@ -269,6 +266,8 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 /* POST : 식단 공지 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
+    sleep(2000);
+
     //console.log(req.body);
     var query = {
         notice : req.body.notice
@@ -283,6 +282,8 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 /* POST : 로그인 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantLogin', upload.single(), function(req, res){
+    sleep(2000);
+
     //사용자 ID 검사
     Restaurant.find({id:req.body.id}
             , {}
