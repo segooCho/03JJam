@@ -44,7 +44,7 @@ var upload = multer({ storage: storage });
 
 /* GET : 식당 찾기 */
 router.get('/restaurantSearch', function(req, res){
-    sleep(2000);
+    sleep(500);
 
     console.log(req.query.searchText);
     var testJson;
@@ -66,7 +66,7 @@ router.get('/restaurantSearch', function(req, res){
 
 /* GET : 식당 인증 & 공지사항 */
 router.get('/restaurantInfo', function(req, res){
-    sleep(1000);
+    sleep(500);
 
     Restaurant.find({_id:req.query.restaurant_Id}
             ,{_id:0, certification:1, notice:1}
@@ -86,7 +86,7 @@ router.get('/restaurantInfo', function(req, res){
 
 /* GET : 식단 조회 */
 router.get('/mealSearch', function(req, res){
-    sleep(2000);
+    sleep(500);
 
     //날짜 가져오기
     var date = new Date();
@@ -146,7 +146,7 @@ router.get('/mealSearch', function(req, res){
 /*==============================================================================================*/
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    sleep(2000);
+    sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
     console.log('req.body.id' , req.body.id); 
@@ -218,7 +218,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    sleep(2000);
+    sleep(500);
 
     //console.log(req.body);
     //요일 찾기
@@ -266,7 +266,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 /* POST : 식단 공지 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
-    sleep(2000);
+    sleep(500);
 
     //console.log(req.body);
     var query = {
@@ -282,7 +282,7 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 /* POST : 로그인 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantLogin', upload.single(), function(req, res){
-    sleep(2000);
+    sleep(500);
 
     //사용자 ID 검사
     Restaurant.find({id:req.body.id}
