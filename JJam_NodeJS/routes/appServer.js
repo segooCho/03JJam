@@ -294,7 +294,7 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
             if (data.length>0) {
                 //패스워드 검사
                 Restaurant.find({$and:[{id:req.body.id},{password:req.body.password}]}
-                        , {_id:0, id:1}
+                        , {_id:1}
                         , function(err, data){
                     if (err) {
                         httpMsgs.show500(req, res, err);
