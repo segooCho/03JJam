@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var autoIncrement = require('mongoose-auto-increment');
 
 var RestaurantSchema = new Schema({
     id                      : String,
@@ -19,7 +18,6 @@ var RestaurantSchema = new Schema({
     }
 });
 
-
 RestaurantSchema.virtual('getDate').get(function(){
     var date = new Date(this.created_at);
     return {
@@ -29,5 +27,4 @@ RestaurantSchema.virtual('getDate').get(function(){
     };
 });
 
-//RestaurantSchema.plugin( autoIncrement.plugin , { model : "task", field : "id" , startAt : 1 } );
 module.exports = mongoose.model('Restaurant' , RestaurantSchema);

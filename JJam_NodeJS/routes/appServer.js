@@ -2,8 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 // model
-var Restaurant = require('../models/Restaurant');
-var Meal = require('../models/Meal');
+var Restaurant = require('../models/Restaurant');   //식당 회원 정보
+var Group = require('../models/Group');             //식당의 메뉴 관리*(category : 모델 생성이 안됨)
+var Meal = require('../models/Meal');               //식단 정보
+
 // hash
 var crypto = require('crypto');
 // sleep
@@ -142,6 +144,25 @@ router.get('/mealSearch', function(req, res){
     ;
 });
 
+/* GET : 식당 category 항목(Group) 조회 */
+router.get('/restaurantGroup', function(req, res){
+    sleep(500);
+
+    Restaurant.find({restaurant_Id:req.query.restaurant_Id}
+            ,{_id:0, category:1, text:1}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                var msg = "기본 항목 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
+    });
+});
 
 /*==============================================================================================*/
 /* POST : 회원 가입 */
@@ -183,29 +204,33 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
                     if (err) {
                         httpMsgs.show500(req, res, err);
                     }
-                    //console.log('data._id : ', data._id);
-                    var restaurant_Id = data._id
-                    //console.log('restaurant_Id : ', restaurant_Id);
-                    
-                    /*
-                    // 식당 등록
-                    var tmpNotice = "공지사항"
-                    var restaurantNotice = new RestaurantNotice({
-                        restaurant_Id   : restaurant_Id,
-                        notice          : tmpNotice
-                    });
-                    restaurantNotice.save(function(err){
-                        if (err) {
-                            httpMsgs.show500(req, res, err);
-                        }       
-                    });
-                    */
-
-                    //TODO : 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁,사진식단)
+                    //ObjectId("xxxxxx")를 벗김
+                    var restaurant_Id = data._id.toString() 
+                    // 기본 메뉴 & Location(구내식당,학생식당 등) & 구분(아침,점심,저녁,사진식단)
                     // 기본 메뉴 등록
-                    // Location
-                    // 구분
-
+                    // 모든 정보는 하나 이상의 값을 가진다.
+                    //-location     : 구내식당,학생식당 등 , 
+                    //-division     : 사진식단(필수), ('아침', '점심', '저녁') 의 포함한 값으러 설정한다.
+                    //-stapleFood   : 주식(밥,면)
+                    //-soup         : 국
+                    //-sideDish     : 반찬
+                    //-dessert      : 없음(필수) 후식
+                    
+                    //기본 메뉴 등록(category : 모델 생성이 안됨)
+                    var bulk = Group.collection.initializeUnorderedBulkOp();
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'location',       text: '구내식당'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '아침'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '점심'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '저녁'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '사진식단'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'stapleFood',     text: '쌀밥'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'stapleFood',     text: '콩밥'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'soup',           text: '미역국'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'soup',           text: '소고기국'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'sideDish',       text: '김치'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'sideDish',       text: '소고기'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'dessert',        text: '없음'});
+                    bulk.execute();
                 });
 
                 //msg 멘트 변경시 iOS 수정 필요
@@ -301,6 +326,27 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
                     } else {
                         if (data.length>0) {
                             httpMsgs.sendJson(req, res, data);      
+
+                            /*
+                            //식당 category 항목(Group) 조회 
+                            var restaurant_Id = data[0]._id.toString() 
+
+                            Group.find({restaurant_Id: restaurant_Id}
+                                    ,{category:1, text:1}
+                                    , function(err, data){
+                                if (err) {
+                                    httpMsgs.show500(req, res, err);
+                                } else {
+                                    if (data.length>0) {
+                                        httpMsgs.sendJson(req, res, data);      
+                                    } else {
+                                        var msg = "사용자의 기본 항목 정보가 없습니다. 시스템 운영자에게 문의하세요."
+                                        httpMsgs.sendMessageFound(req, res, msg);
+                                    }
+                                }        
+                            });
+                            */
+
                         } else {
                             //로그인 msg 멘트 변경시 iOS 수정 필요
                             var msg = "패스워드가 잘못되었습니다."

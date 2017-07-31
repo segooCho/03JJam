@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var autoIncrement = require('mongoose-auto-increment');
 
 var MealSchema = new Schema({
     restaurant_Id   : String,
@@ -33,5 +32,4 @@ MealSchema.virtual('getDate').get(function(){
     };
 });
 
-//MealSchema.plugin( autoIncrement.plugin , { model : "task", field : "id" , startAt : 1 } );
 module.exports = mongoose.model('Meal' , MealSchema);
