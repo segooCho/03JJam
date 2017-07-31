@@ -46,7 +46,7 @@ var upload = multer({ storage: storage });
 
 /* GET : 식당 찾기 */
 router.get('/restaurantSearch', function(req, res){
-    sleep(500);
+    sleep(100);
 
     console.log(req.query.searchText);
     var testJson;
@@ -68,7 +68,7 @@ router.get('/restaurantSearch', function(req, res){
 
 /* GET : 식당 인증 & 공지사항 */
 router.get('/restaurantInfo', function(req, res){
-    sleep(500);
+    sleep(100);
 
     Restaurant.find({_id:req.query.restaurant_Id}
             ,{_id:0, certification:1, notice:1}
@@ -88,7 +88,7 @@ router.get('/restaurantInfo', function(req, res){
 
 /* GET : 식단 조회 */
 router.get('/mealSearch', function(req, res){
-    sleep(500);
+    sleep(100);
 
     //날짜 가져오기
     var date = new Date();
@@ -124,7 +124,7 @@ router.get('/mealSearch', function(req, res){
     //console.log(dateQuery1);
 
     Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id}, dateQuery1, dateQuery2]}
-            ,{created_at:0, __v:0, restaurant_Id:0}
+            ,{}
             ,{}
             , function(err, data){
         if (err) {
@@ -144,17 +144,19 @@ router.get('/mealSearch', function(req, res){
     ;
 });
 
-/* GET : 식당 category 항목(Group) 조회 */
+/* GET : 식당 category 항목(Group) 조회 */1
 router.get('/restaurantGroup', function(req, res){
-    sleep(500);
+    sleep(2000);
 
-    Restaurant.find({restaurant_Id:req.query.restaurant_Id}
-            ,{_id:0, category:1, text:1}
+    Group.find({restaurant_Id:req.query.restaurant_Id}
+            ,{_id:0, restaurant_Id:1, category:1, text:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
+                //var msg = "기본 항목 정보가 없습니다."
+                //httpMsgs.sendMessageFound(req, res, msg);
                 httpMsgs.sendJson(req, res, data);      
             } else {
                 var msg = "기본 항목 정보가 없습니다."
@@ -167,7 +169,7 @@ router.get('/restaurantGroup', function(req, res){
 /*==============================================================================================*/
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    sleep(500);
+    sleep(100);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
     console.log('req.body.id' , req.body.id); 
@@ -243,7 +245,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    sleep(500);
+    sleep(100);
 
     //console.log(req.body);
     //요일 찾기
@@ -284,14 +286,99 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         foodImage       : (req.file) ? req.file.filename : ""
     });
     meal.save(function(err){
-        httpMsgs.sendNoDataFound(req, res);
+        //httpMsgs.sendNoDataFound(req, res);
+        var msg = "식단 저장이 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
     });
 });
 
+/* POST : 식단 수정 */
+router.post('/mealEdit', upload.single('foodImage'), function(req, res){
+    sleep(100);
+    console.log(req.body);
+    
+    //요일 찾기
+    var weekName = new Array('일','월','화','수','목','금','토'); 
+    var year = req.body.mealDate.substring(0,4);
+    var month = req.body.mealDate.substring(5,7);
+    var day = req.body.mealDate.substring(8,10);
+    var week = new Date(year, month-1, day, 0,0,0,0);               //month는 0~11까지임 
+    week = weekName[week.getDay()]; 
+  
+    //아침,점심,저녁으로 구분
+    var sort
+    if (req.body.division.indexOf('아침') > -1) {
+        sort = 0
+    } else if (req.body.division.indexOf('점심') > -1) {
+        sort = 1
+    } else if (req.body.division.indexOf('저녁') > -1) {
+        sort = 2
+    } else {
+        sort = 3
+    }
+
+    var query;
+    Meal.findOne({_id : req.body._id}
+        , function(err, data){
+
+        if(req.file){  //요청중에 파일이 존재 할시 기존 mediaFile을 지운다.
+            if (data.foodImage != "") {
+                console.log('=> 파일 삭제');
+                fs.unlinkSync(uploadDir + '/' + data.foodImage);
+                //fs.unlink(uploadDir + '/' + data.foodImage);
+            //} else {
+                //console.log('=>등록된 파일은 없음');
+            }
+            
+            console.log('=> 등록 요청 파일 있음');
+            query = {
+                mealDate        : req.body.mealDate,
+                mealDateLabel   : week,
+                location        : req.body.location,
+                division        : req.body.division,
+                sort            : sort,
+                stapleFood      : req.body.stapleFood,
+                soup            : req.body.soup,
+                sideDish1       : req.body.sideDish1,
+                sideDish2       : req.body.sideDish2,
+                sideDish3       : req.body.sideDish3,
+                sideDish4       : req.body.sideDish4,
+                dessert         : req.body.dessert,
+                remarks         : req.body.remarks,
+                foodImage       : (req.file) ? req.file.filename : ""
+            };
+        } else {
+            console.log('=> 등록 요청 파일 없음');
+            query = {
+                mealDate        : req.body.mealDate,
+                mealDateLabel   : week,
+                location        : req.body.location,
+                division        : req.body.division,
+                sort            : sort,
+                stapleFood      : req.body.stapleFood,
+                soup            : req.body.soup,
+                sideDish1       : req.body.sideDish1,
+                sideDish2       : req.body.sideDish2,
+                sideDish3       : req.body.sideDish3,
+                sideDish4       : req.body.sideDish4,
+                dessert         : req.body.dessert,
+                remarks         : req.body.remarks,
+            };
+        }
+
+        Meal.update({_id : req.body._id}, 
+                    { $set : query },
+        function(err){
+            //httpMsgs.sendNoDataFound(req, res);
+            var msg = "식단 저장이 완료되었습니다."
+            httpMsgs.sendMessageFound(req, res, msg);
+        });
+    });
+});
 /* POST : 식단 공지 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
-    sleep(500);
+    sleep(100);
 
     //console.log(req.body);
     var query = {
@@ -307,7 +394,7 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 /* POST : 로그인 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantLogin', upload.single(), function(req, res){
-    sleep(500);
+    sleep(100);
 
     //사용자 ID 검사
     Restaurant.find({id:req.body.id}
