@@ -246,8 +246,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     sleep(100);
-
-    console.log(req.body);
+    
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
     var year = req.body.mealDate.substring(0,4);
@@ -374,7 +373,33 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
         });
     });
 });
-/* POST : 식단 공지 수정 */
+
+/* GET : 식단 삭제 */
+router.get('/mealDel', function(req, res){
+    sleep(100);
+    console.log(req.query._id)
+
+    Meal.findOne({_id : req.query._id}
+        , function(err, data){
+            if (err) {
+                var msg = "존재하지 않는 식단 Oid 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            } else {
+                //console.log(data)
+                if (data.foodImage != "") {
+                    console.log('=> 파일 삭제');
+                    fs.unlinkSync(uploadDir + '/' + data.foodImage);
+                }
+                Meal.remove({_id : req.query._id}
+                    , function(err){
+                        var msg = "식단 삭제가 완료되었습니다."
+                        httpMsgs.sendMessageFound(req, res, msg);
+                });
+            }
+    });
+});
+
+/* POST : 식당 공지 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     sleep(100);
