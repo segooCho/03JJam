@@ -16,7 +16,7 @@ GET /restaurantInfo
         01.restaurant_Id             :   Text =>     식당_id
 
 
-오늘의 식단
+식단 조회
 GET /mealSearch
     Req.Query.Parameter
         01.restaurant_Id             :   Text =>     식당_id

@@ -247,7 +247,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     sleep(100);
 
-    //console.log(req.body);
+    console.log(req.body);
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
     var year = req.body.mealDate.substring(0,4);
@@ -295,8 +295,8 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 /* POST : 식단 수정 */
 router.post('/mealEdit', upload.single('foodImage'), function(req, res){
     sleep(100);
-    console.log(req.body);
-    
+    //console.log(req.body);
+
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
     var year = req.body.mealDate.substring(0,4);
@@ -321,7 +321,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
     Meal.findOne({_id : req.body._id}
         , function(err, data){
 
-        if(req.file){  //요청중에 파일이 존재 할시 기존 mediaFile을 지운다.
+        if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
             if (data.foodImage != "") {
                 console.log('=> 파일 삭제');
                 fs.unlinkSync(uploadDir + '/' + data.foodImage);
@@ -329,7 +329,6 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
             //} else {
                 //console.log('=>등록된 파일은 없음');
             }
-            
             console.log('=> 등록 요청 파일 있음');
             query = {
                 mealDate        : req.body.mealDate,
@@ -362,7 +361,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
                 sideDish3       : req.body.sideDish3,
                 sideDish4       : req.body.sideDish4,
                 dessert         : req.body.dessert,
-                remarks         : req.body.remarks,
+                remarks         : req.body.remarks
             };
         }
 
