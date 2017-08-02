@@ -5,31 +5,36 @@ Endpoint: http://127.0.0.1:3000/
 /********************************  찾기  ***********************************/
 
 
-ObjectId
-
 
 관심 식당 찾기
-GET /restaurantSearch
-    Req.Query.Parameter
+POST /restaurantSearch
+    Req.Body.Parameter
         01.searchText                :   Text =>     검색어 (주소 & 상호)
 
 식당 인증 & 공지사항
-GET /restaurantInfo
-    Req.Query.Parameter
-        01.restaurant_Id             :   Text =>     _id
+POST /restaurantInfo
+    Req.Body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
 
 
 식단 조회
-GET /mealSearch
-    Req.Query.Parameter
-        01.restaurant_Id             :   Text =>     식당_id
+POST /mealSearch
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.segmentedId               :   Text =>     오늘 식단(0):오늘 만   
                                                      계회 식단(1):오늘 이후  
                                                      과거 식단(2):오늘 이전 
+
+식당 category 항목(Group) 조회
+POST /restaurantGroup
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+
+
 로그인
 POST /restaurantLogin
     Req.body.Parameter
-        01.id                       :   Text =>     사용자 id
+        01.id                       :   Text =>     id(사용자 입력 ID)
         02.password                 :   Text =>     패스워스(hash: sha-256 digest(Hex)
 
 
@@ -39,7 +44,7 @@ POST /restaurantLogin
 회원 가입
 POST /restaurantSignUp
     Req.Body.Parameter
-        01.id                        :   Text =>     id(사용자 ID)
+        01.id                        :   Text =>     id(사용자 입력 ID)
         02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
         03.businessNumber            :   Text =>     사업자 번호
         04.companyName               :   Text =>     상호
@@ -56,7 +61,7 @@ POST /restaurantSignUp
 식단 등록
 POST /mealWrite
     Req.Query.Parameter
-        01.restaurant_Id             :   Text =>     식당_id
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.mealDate                  :   Text =>     날짜
         03.location                  :   Text =>     위치(기본으로 구내식당, 추후 : 교직원 식당, 학생 식당 등으로 사용)
         03.division                  :   Text =>     구분(기본으로 아침,점심,저녁 / 아침-정식, 아침-간편식 등으로 사용 
@@ -76,7 +81,7 @@ POST /mealWrite
 식단 수정
 POST /mealEdit
     Req.Query.Parameter
-        01._id                       :   Text =>     _id(Meal Oid)
+        01.meal_Id                   :   Text =>     _id(Meal Oid)
         02.mealDate                  :   Text =>     날짜
         03.location                  :   Text =>     위치(기본으로 구내식당, 추후 : 교직원 식당, 학생 식당 등으로 사용)
         03.division                  :   Text =>     구분(기본으로 아침,점심,저녁 / 아침-정식, 아침-간편식 등으로 사용 
@@ -96,13 +101,13 @@ POST /mealEdit
       =>sort            : division의 문자열 중 '아침,점심,저녁' 을 이용하여 서버에서 처리
 
 
-식단 삭제
-GET /mealDel
-    Req.Query.Parameter
-        01._id                       :   Text =>     _id(Meal Oid)
+식단 삭제 
+POST /mealDel
+    Req.body.Parameter
+        01.meal_Id                   :   Text =>     _id(Meal Oid)
 
 
-식당 공지사항 수정
+식당 공지사항 수정 
 POST /restaurantNoticeEdit
     Req.Query.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)

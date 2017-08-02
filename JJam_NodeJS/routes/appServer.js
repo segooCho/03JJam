@@ -44,13 +44,13 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 
-/* GET : 식당 찾기 */
-router.get('/restaurantSearch', function(req, res){
+/* POST : 식당 찾기 */
+router.post('/restaurantSearch', uploadSignUp.single(), function(req, res){
     sleep(500);
+    //console.log(req.body.searchText);
+    //var testJson;
 
-    console.log(req.query.searchText);
-    var testJson;
-    Restaurant.find({$or:[{companyName:{$regex:req.query.searchText}},{address:{$regex:req.query.searchText}}]}
+    Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}},{address:{$regex:req.body.searchText}}]}
             ,{_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1}
             , function(err, data){
         if (err) {
@@ -66,11 +66,11 @@ router.get('/restaurantSearch', function(req, res){
     });
 });
 
-/* GET : 식당 인증 & 공지사항 */
-router.get('/restaurantInfo', function(req, res){
+/* POST : 식당 인증 & 공지사항 */
+router.post('/restaurantInfo', uploadSignUp.single(), function(req, res){
     sleep(500);
 
-    Restaurant.find({_id:req.query.restaurant_Id}
+    Restaurant.find({_id:req.body.restaurant_Id}
             ,{_id:0, certification:1, notice:1}
             , function(err, data){
         if (err) {
@@ -86,8 +86,8 @@ router.get('/restaurantInfo', function(req, res){
     });
 });
 
-/* GET : 식단 조회 */
-router.get('/mealSearch', function(req, res){
+/* POST : 식단 조회 */
+router.post('/mealSearch', uploadSignUp.single(), function(req, res){
     sleep(500);
 
     //날짜 가져오기
@@ -104,26 +104,26 @@ router.get('/mealSearch', function(req, res){
     var dateQuery1 = {};
     var dateQuery2 = {};
     var msgSegmented = ""
-    if (req.query.segmentedId  == 0) {
+    if (req.body.segmentedId  == 0) {
         dateQuery1 = {mealDate:{$eq:today}};             //오늘
         dateQuery2 = {sort:{$ne:3}};                    //sort
         msgSegmented = "오늘"
-    } else if (req.query.segmentedId  == 1) {
+    } else if (req.body.segmentedId  == 1) {
         dateQuery1 = {mealDate:{$gt:today}};             //계획
         dateQuery2 = {sort:{$ne:3}};                    //sort
         msgSegmented = "계획"
-    } else if (req.query.segmentedId  == 2) {
+    } else if (req.body.segmentedId  == 2) {
         dateQuery1 = {mealDate:{$lt:today}};             //과거
         dateQuery2 = {sort:{$ne:3}};                    //sort
         msgSegmented = "과거"
-    } else if (req.query.segmentedId  == 3) {
+    } else if (req.body.segmentedId  == 3) {
         dateQuery1 = {sort:3};                          //사진식단
         dateQuery2 = {sort:3};                          //sort
         msgSegmented = "사진"
     }
     //console.log(dateQuery1);
 
-    Meal.find({$and:[{restaurant_Id:req.query.restaurant_Id}, dateQuery1, dateQuery2]}
+    Meal.find({$and:[{restaurant_Id:req.body.restaurant_Id}, dateQuery1, dateQuery2]}
             ,{}
             ,{}
             , function(err, data){
@@ -144,11 +144,11 @@ router.get('/mealSearch', function(req, res){
     ;
 });
 
-/* GET : 식당 category 항목(Group) 조회 */1
-router.get('/restaurantGroup', function(req, res){
+/* POST : 식당 category 항목(Group) 조회 */
+router.post('/restaurantGroup', uploadSignUp.single(), function(req, res){
     sleep(500);
 
-    Group.find({restaurant_Id:req.query.restaurant_Id}
+    Group.find({restaurant_Id:req.body.restaurant_Id}
             ,{_id:0, restaurant_Id:1, category:1, text:1}
             , function(err, data){
         if (err) {
@@ -166,6 +166,43 @@ router.get('/restaurantGroup', function(req, res){
     });
 });
 
+/* POST : 로그인 */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantLogin', upload.single(), function(req, res){
+    sleep(500);
+
+    //사용자 ID 검사
+    Restaurant.find({id:req.body.id}
+            , {}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                //패스워드 검사
+                Restaurant.find({$and:[{id:req.body.id},{password:req.body.password}]}
+                        , {_id:1}
+                        , function(err, data){
+                    if (err) {
+                        httpMsgs.show500(req, res, err);
+                    } else {
+                        if (data.length>0) {
+                            httpMsgs.sendJson(req, res, data);      
+                        } else {
+                            //로그인 msg 멘트 변경시 iOS 수정 필요
+                            var msg = "패스워드가 잘못되었습니다."
+                            httpMsgs.sendMessageFound(req, res, msg);
+                        }
+                    }        
+                });
+            } else {
+                //로그인 msg 멘트 변경시 iOS 수정 필요
+                var msg = "존재하는 않는 사용자ID 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
+    });
+});
 /*==============================================================================================*/
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
@@ -317,85 +354,94 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
     }
 
     var query;
-    Meal.findOne({_id : req.body._id}
+    Meal.findOne({_id : req.body.meal_Id}
         , function(err, data){
 
-        if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
-            if (data.foodImage != "") {
-                console.log('=> 파일 삭제');
-                fs.unlinkSync(uploadDir + '/' + data.foodImage);
-                //fs.unlink(uploadDir + '/' + data.foodImage);
-            //} else {
-                //console.log('=>등록된 파일은 없음');
-            }
-            console.log('=> 등록 요청 파일 있음');
-            query = {
-                mealDate        : req.body.mealDate,
-                mealDateLabel   : week,
-                location        : req.body.location,
-                division        : req.body.division,
-                sort            : sort,
-                stapleFood      : req.body.stapleFood,
-                soup            : req.body.soup,
-                sideDish1       : req.body.sideDish1,
-                sideDish2       : req.body.sideDish2,
-                sideDish3       : req.body.sideDish3,
-                sideDish4       : req.body.sideDish4,
-                dessert         : req.body.dessert,
-                remarks         : req.body.remarks,
-                foodImage       : (req.file) ? req.file.filename : ""
-            };
-        } else {
-            console.log('=> 등록 요청 파일 없음');
-            query = {
-                mealDate        : req.body.mealDate,
-                mealDateLabel   : week,
-                location        : req.body.location,
-                division        : req.body.division,
-                sort            : sort,
-                stapleFood      : req.body.stapleFood,
-                soup            : req.body.soup,
-                sideDish1       : req.body.sideDish1,
-                sideDish2       : req.body.sideDish2,
-                sideDish3       : req.body.sideDish3,
-                sideDish4       : req.body.sideDish4,
-                dessert         : req.body.dessert,
-                remarks         : req.body.remarks
-            };
-        }
-
-        Meal.update({_id : req.body._id}, 
-                    { $set : query },
-        function(err){
-            //httpMsgs.sendNoDataFound(req, res);
-            var msg = "식단 저장이 완료되었습니다."
+        if (data == null) {
+            var msg = "존재하지 않는 Oid 입니다."
             httpMsgs.sendMessageFound(req, res, msg);
-        });
+        } else {
+            if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
+                if (data.foodImage != "") {
+                    console.log('=> 파일 삭제');
+                    fs.unlinkSync(uploadDir + '/' + data.foodImage);
+                    //fs.unlink(uploadDir + '/' + data.foodImage);
+                //} else {
+                    //console.log('=>등록된 파일은 없음');
+                }
+                console.log('=> 등록 요청 파일 있음');
+                query = {
+                    mealDate        : req.body.mealDate,
+                    mealDateLabel   : week,
+                    location        : req.body.location,
+                    division        : req.body.division,
+                    sort            : sort,
+                    stapleFood      : req.body.stapleFood,
+                    soup            : req.body.soup,
+                    sideDish1       : req.body.sideDish1,
+                    sideDish2       : req.body.sideDish2,
+                    sideDish3       : req.body.sideDish3,
+                    sideDish4       : req.body.sideDish4,
+                    dessert         : req.body.dessert,
+                    remarks         : req.body.remarks,
+                    foodImage       : (req.file) ? req.file.filename : ""
+                };
+            } else {
+                console.log('=> 등록 요청 파일 없음');
+                query = {
+                    mealDate        : req.body.mealDate,
+                    mealDateLabel   : week,
+                    location        : req.body.location,
+                    division        : req.body.division,
+                    sort            : sort,
+                    stapleFood      : req.body.stapleFood,
+                    soup            : req.body.soup,
+                    sideDish1       : req.body.sideDish1,
+                    sideDish2       : req.body.sideDish2,
+                    sideDish3       : req.body.sideDish3,
+                    sideDish4       : req.body.sideDish4,
+                    dessert         : req.body.dessert,
+                    remarks         : req.body.remarks
+                };
+            }
+
+            Meal.update({_id : req.body.meal_Id}, 
+                        { $set : query },
+            function(err){
+                //httpMsgs.sendNoDataFound(req, res);
+                var msg = "식단 저장이 완료되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            });
+        }
     });
 });
 
-/* GET : 식단 삭제 */
-router.get('/mealDel', function(req, res){
+/* POST : 식단 삭제 */
+router.post('/mealDel', upload.single(), function(req, res){
     sleep(500);
     //console.log(req.query._id)
 
-    Meal.findOne({_id : req.query._id}
+    Meal.findOne({_id : req.body.meal_Id}
         , function(err, data){
             if (err) {
-                var msg = "존재하지 않는 식단 Oid 입니다."
-                httpMsgs.sendMessageFound(req, res, msg);
+                httpMsgs.show500(req, res, err);
             } else {
-                //console.log(data)
-                if (data.foodImage != "") {
-                    //console.log('=> 파일 삭제');
-                    fs.unlinkSync(uploadDir + '/' + data.foodImage);
-                }
-                Meal.remove({_id : req.query._id}
-                    , function(err){
-                        //로그인 msg 멘트 변경시 iOS 수정 필요
-                        var msg = "식단 삭제가 완료되었습니다."
+                    if (data == null) {
+                        var msg = "존재하지 않는 Oid 입니다."
                         httpMsgs.sendMessageFound(req, res, msg);
-                });
+                    } else {
+                        if (data.foodImage != "") {
+                            //console.log('=> 파일 삭제');
+                            fs.unlinkSync(uploadDir + '/' + data.foodImage);
+                        }
+                        Meal.remove({_id : req.body.meal_Id}
+                            , function(err){
+                                //로그인 msg 멘트 변경시 iOS 수정 필요
+                                var msg = "식단 삭제가 완료되었습니다."
+                                httpMsgs.sendMessageFound(req, res, msg);
+                        });
+
+                    }
             } 
     });
 });
@@ -405,8 +451,8 @@ router.get('/mealDel', function(req, res){
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     sleep(500);
 
-    console.log(req.body.restaurant_Id)
-    console.log(req.body.notice)
+    //console.log(req.body.restaurant_Id)
+    //console.log(req.body.notice)
 
     var query = {
         notice        : req.body.notice
@@ -422,41 +468,5 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 
 });
 
-/* POST : 로그인 */
-// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.post('/restaurantLogin', upload.single(), function(req, res){
-    sleep(500);
 
-    //사용자 ID 검사
-    Restaurant.find({id:req.body.id}
-            , {}
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            if (data.length>0) {
-                //패스워드 검사
-                Restaurant.find({$and:[{id:req.body.id},{password:req.body.password}]}
-                        , {_id:1}
-                        , function(err, data){
-                    if (err) {
-                        httpMsgs.show500(req, res, err);
-                    } else {
-                        if (data.length>0) {
-                            httpMsgs.sendJson(req, res, data);      
-                        } else {
-                            //로그인 msg 멘트 변경시 iOS 수정 필요
-                            var msg = "패스워드가 잘못되었습니다."
-                            httpMsgs.sendMessageFound(req, res, msg);
-                        }
-                    }        
-                });
-            } else {
-                //로그인 msg 멘트 변경시 iOS 수정 필요
-                var msg = "존재하는 않는 사용자ID 입니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            }
-        }        
-    });
-});
 module.exports = router;
