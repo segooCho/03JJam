@@ -46,7 +46,7 @@ var upload = multer({ storage: storage });
 
 /* GET : 식당 찾기 */
 router.get('/restaurantSearch', function(req, res){
-    sleep(100);
+    sleep(500);
 
     console.log(req.query.searchText);
     var testJson;
@@ -68,7 +68,7 @@ router.get('/restaurantSearch', function(req, res){
 
 /* GET : 식당 인증 & 공지사항 */
 router.get('/restaurantInfo', function(req, res){
-    sleep(100);
+    sleep(500);
 
     Restaurant.find({_id:req.query.restaurant_Id}
             ,{_id:0, certification:1, notice:1}
@@ -79,7 +79,7 @@ router.get('/restaurantInfo', function(req, res){
             if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);      
             } else {
-                var msg = "선택된 식당은 탈퇴한 상태입니다."
+                var msg = "정보를 찾을 수 없거나 탈퇴된 상태입니다."
                 httpMsgs.sendMessageFound(req, res, msg);
             }
         }        
@@ -88,7 +88,7 @@ router.get('/restaurantInfo', function(req, res){
 
 /* GET : 식단 조회 */
 router.get('/mealSearch', function(req, res){
-    sleep(100);
+    sleep(500);
 
     //날짜 가져오기
     var date = new Date();
@@ -146,7 +146,7 @@ router.get('/mealSearch', function(req, res){
 
 /* GET : 식당 category 항목(Group) 조회 */1
 router.get('/restaurantGroup', function(req, res){
-    sleep(2000);
+    sleep(500);
 
     Group.find({restaurant_Id:req.query.restaurant_Id}
             ,{_id:0, restaurant_Id:1, category:1, text:1}
@@ -169,7 +169,7 @@ router.get('/restaurantGroup', function(req, res){
 /*==============================================================================================*/
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
-    sleep(100);
+    sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
     console.log('req.body.id' , req.body.id); 
@@ -245,7 +245,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    sleep(100);
+    sleep(500);
     
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
@@ -293,7 +293,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 
 /* POST : 식단 수정 */
 router.post('/mealEdit', upload.single('foodImage'), function(req, res){
-    sleep(100);
+    sleep(500);
     //console.log(req.body);
 
     //요일 찾기
@@ -376,8 +376,8 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
 
 /* GET : 식단 삭제 */
 router.get('/mealDel', function(req, res){
-    sleep(100);
-    console.log(req.query._id)
+    sleep(500);
+    //console.log(req.query._id)
 
     Meal.findOne({_id : req.query._id}
         , function(err, data){
@@ -387,38 +387,45 @@ router.get('/mealDel', function(req, res){
             } else {
                 //console.log(data)
                 if (data.foodImage != "") {
-                    console.log('=> 파일 삭제');
+                    //console.log('=> 파일 삭제');
                     fs.unlinkSync(uploadDir + '/' + data.foodImage);
                 }
                 Meal.remove({_id : req.query._id}
                     , function(err){
+                        //로그인 msg 멘트 변경시 iOS 수정 필요
                         var msg = "식단 삭제가 완료되었습니다."
                         httpMsgs.sendMessageFound(req, res, msg);
                 });
-            }
+            } 
     });
 });
 
-/* POST : 식당 공지 수정 */
+/* POST : 식당 공지사항 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
-    sleep(100);
+    sleep(500);
 
-    //console.log(req.body);
+    console.log(req.body.restaurant_Id)
+    console.log(req.body.notice)
+
     var query = {
-        notice : req.body.notice
+        notice        : req.body.notice
     };
 
-    Restaurant.update( {restaurant_Id : req.body.restaurant_Id }, { $set : query },
+    Restaurant.update({_id : req.body.restaurant_Id}, 
+                { $set : query },
     function(err){
-        httpMsgs.sendNoDataFound(req, res);
+        //httpMsgs.sendNoDataFound(req, res);
+        var msg = "저장 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
     });
+
 });
 
 /* POST : 로그인 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantLogin', upload.single(), function(req, res){
-    sleep(100);
+    sleep(500);
 
     //사용자 ID 검사
     Restaurant.find({id:req.body.id}
@@ -437,27 +444,6 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
                     } else {
                         if (data.length>0) {
                             httpMsgs.sendJson(req, res, data);      
-
-                            /*
-                            //식당 category 항목(Group) 조회 
-                            var restaurant_Id = data[0]._id.toString() 
-
-                            Group.find({restaurant_Id: restaurant_Id}
-                                    ,{category:1, text:1}
-                                    , function(err, data){
-                                if (err) {
-                                    httpMsgs.show500(req, res, err);
-                                } else {
-                                    if (data.length>0) {
-                                        httpMsgs.sendJson(req, res, data);      
-                                    } else {
-                                        var msg = "사용자의 기본 항목 정보가 없습니다. 시스템 운영자에게 문의하세요."
-                                        httpMsgs.sendMessageFound(req, res, msg);
-                                    }
-                                }        
-                            });
-                            */
-
                         } else {
                             //로그인 msg 멘트 변경시 iOS 수정 필요
                             var msg = "패스워드가 잘못되었습니다."
