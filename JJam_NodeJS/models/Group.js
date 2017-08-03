@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 // 기본 메뉴 등록
 // 모든 정보는 하나 이상의 값을 가진다.
 //-location     : 구내식당,학생식당 등 , 
-//-division     : 사진식단(필수), ('아침', '점심', '저녁') 의 포함한 값으러 설정한다.
+//-division     : 사진식단(필수), ('아침', '점심', '저녁')이 포함한 값으로 설정한다.
 //-stapleFood   : 주식(밥,면)
 //-soup         : 국
 //-sideDish     : 반찬
@@ -14,7 +14,7 @@ var Schema = mongoose.Schema;
 
 var GroupSchema = new Schema({
     restaurant_Id   : String,
-    category        : String,
+    group        : String,
     text            : String,
 });
 

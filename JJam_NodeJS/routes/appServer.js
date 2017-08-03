@@ -100,25 +100,25 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
     var today = year + "-" + month + "-" + day
 
     //segmentedId 구분 처리
-    //dateQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함용
+    //dataQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함용
     var dateQuery1 = {};
     var dateQuery2 = {};
     var msgSegmented = ""
-    if (req.body.segmentedId  == 0) {
+    if (req.body.segmentedId == 0) {
         dateQuery1 = {mealDate:{$eq:today}};             //오늘
-        dateQuery2 = {sort:{$ne:3}};                    //sort
+        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "오늘"
-    } else if (req.body.segmentedId  == 1) {
+    } else if (req.body.segmentedId == 1) {
         dateQuery1 = {mealDate:{$gt:today}};             //계획
-        dateQuery2 = {sort:{$ne:3}};                    //sort
+        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "계획"
-    } else if (req.body.segmentedId  == 2) {
+    } else if (req.body.segmentedId == 2) {
         dateQuery1 = {mealDate:{$lt:today}};             //과거
-        dateQuery2 = {sort:{$ne:3}};                    //sort
+        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "과거"
-    } else if (req.body.segmentedId  == 3) {
-        dateQuery1 = {sort:3};                          //사진식단
-        dateQuery2 = {sort:3};                          //sort
+    } else if (req.body.segmentedId == 3) {
+        dateQuery1 = {division:'사진식단'};                          //사진식단
+        dateQuery2 = {division:'사진식단'};                          //sort
         msgSegmented = "사진"
     }
     //console.log(dateQuery1);
@@ -144,12 +144,19 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
     ;
 });
 
-/* POST : 식당 category 항목(Group) 조회 */
+/* POST : 식당 항목(Group) 조회 */
 router.post('/restaurantGroup', uploadSignUp.single(), function(req, res){
     sleep(500);
 
-    Group.find({restaurant_Id:req.body.restaurant_Id}
-            ,{_id:0, restaurant_Id:1, category:1, text:1}
+    var dataQuery = {};
+    if (req.body.group != '') {
+        dataQuery = {group:req.body.group}; 
+    }
+
+    console.log(dataQuery)
+
+    Group.find({$and:[{restaurant_Id:req.body.restaurant_Id},dataQuery]}
+            ,{_id:0, restaurant_Id:1, group:1, text:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -257,18 +264,25 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
                     
                     //기본 메뉴 등록(category : 모델 생성이 안됨)
                     var bulk = Group.collection.initializeUnorderedBulkOp();
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'location',       text: '구내식당'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '아침'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '점심'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '저녁'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'division',       text: '사진식단'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'stapleFood',     text: '쌀밥'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'stapleFood',     text: '콩밥'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'soup',           text: '미역국'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'soup',           text: '소고기국'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'sideDish',       text: '김치'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'sideDish',       text: '소고기'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, category: 'dessert',        text: '없음'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'location',       text: '구내식당'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '아침'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-A'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-B'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '저녁'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '사진식단'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '쌀밥'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '콩밥'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '짜장면'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '된장국'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '미역국'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '소고기국'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김치'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '소고기'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '수육'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '콩나물'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '과일'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '없음'});
                     bulk.execute();
                 });
 
@@ -279,6 +293,81 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
         }        
     });
 });
+
+/* POST : 회원 수정 */
+router.post('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res){
+    sleep(500);
+
+    var query;
+    Restaurant.findOne({_id : req.body.restaurant_Id}
+        , function(err, data){
+
+        if (data == null) {
+            var msg = "존재하지 않는 Oid 입니다."
+            httpMsgs.sendMessageFound(req, res, msg);
+        } else {
+            if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
+                if (data.businessLicenseImage != "") {
+                    console.log('=> 파일 삭제');
+                    fs.unlinkSync(uploadSignUpDir + '/' + data.businessLicenseImage);
+                    //fs.unlink(uploadDir + '/' + data.businessLicenseImage);
+                //} else {
+                    //console.log('=>등록된 파일은 없음');
+                }
+                console.log('=> 등록 요청 파일 있음');
+                if (req.body.password != '') {
+                    query = {
+                        password                : req.body.password,
+                        businessNumber          : req.body.businessNumber,
+                        companyName             : req.body.companyName,
+                        address                 : req.body.address,
+                        contactNumber           : req.body.contactNumber,
+                        representative          : req.body.representative,
+                        businessLicenseImage    : (req.file) ? req.file.filename : "",
+                    };
+                } else {
+                    query = {
+                        businessNumber          : req.body.businessNumber,
+                        companyName             : req.body.companyName,
+                        address                 : req.body.address,
+                        contactNumber           : req.body.contactNumber,
+                        representative          : req.body.representative,
+                        businessLicenseImage    : (req.file) ? req.file.filename : "",
+                    };
+                }
+            } else {
+                console.log('=> 등록 요청 파일 없음');
+                if (req.body.password != '') {
+                    query = {
+                        password                : req.body.password,
+                        businessNumber          : req.body.businessNumber,
+                        companyName             : req.body.companyName,
+                        address                 : req.body.address,
+                        contactNumber           : req.body.contactNumber,
+                        representative          : req.body.representative,
+                    };
+                } else {
+                    query = {
+                        businessNumber          : req.body.businessNumber,
+                        companyName             : req.body.companyName,
+                        address                 : req.body.address,
+                        contactNumber           : req.body.contactNumber,
+                        representative          : req.body.representative,
+                    };
+                }
+            }
+
+            Restaurant.update({_id : req.body.restaurant_Id}
+                , { $set : query }
+                , function(err){
+                    //httpMsgs.sendNoDataFound(req, res);
+                    var msg = "회원 수정이 완료되었습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+            });
+        }
+    });
+});
+
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
@@ -300,8 +389,10 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         sort = 1
     } else if (req.body.division.indexOf('저녁') > -1) {
         sort = 2
-    } else {
+    } else if (req.body.division.indexOf('사진식단') > -1) {
         sort = 3
+    } else {
+        sort = 4
     }
 
     var meal = new Meal({
@@ -322,7 +413,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         foodImage       : (req.file) ? req.file.filename : ""
     });
     meal.save(function(err){
-        //httpMsgs.sendNoDataFound(req, res);
+        //로그인 msg 멘트 변경시 iOS 수정 필요
         var msg = "식단 저장이 완료되었습니다."
         httpMsgs.sendMessageFound(req, res, msg);
     });
@@ -408,7 +499,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
             Meal.update({_id : req.body.meal_Id}, 
                         { $set : query },
             function(err){
-                //httpMsgs.sendNoDataFound(req, res);
+                //로그인 msg 멘트 변경시 iOS 수정 필요
                 var msg = "식단 저장이 완료되었습니다."
                 httpMsgs.sendMessageFound(req, res, msg);
             });
@@ -417,6 +508,26 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
 });
 
 /* POST : 식단 삭제 */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
+    sleep(500);
+
+    //console.log(req.body.restaurant_Id)
+    //console.log(req.body.notice)
+
+    var query = {
+        notice        : req.body.notice
+    };
+
+    Restaurant.update({_id : req.body.restaurant_Id}, 
+                { $set : query },
+    function(err){
+        //httpMsgs.sendNoDataFound(req, res);
+        var msg = "저장 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
+    });
+
+});
 router.post('/mealDel', upload.single(), function(req, res){
     sleep(500);
     //console.log(req.query._id)
@@ -468,5 +579,40 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
 
 });
 
+/* POST : 식당 항목(Group) 추가  */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantGroupAdd', upload.single(), function(req, res){
+    sleep(500);
+
+    console.log(req.body)
+
+    var group = new Group({
+        restaurant_Id   : req.body.restaurant_Id,
+        group        : req.body.group,
+        text            : req.body.text,
+    });
+    group.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
+    });
+});
+
+/* POST : 식당 항목 (Group) 삭제  */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantGroupDel', upload.single(), function(req, res){
+    sleep(500);
+
+    console.log(req.body)
+
+    Group.remove({$and:[{restaurant_Id : req.body.restaurant_Id}
+                       ,{group: req.body.group}
+                       ,{text: req.body.text}]}
+        , function(err){
+            //msg 멘트 변경시 iOS 수정 필요
+            var msg = "삭제가 완료되었습니다."
+            httpMsgs.sendMessageFound(req, res, msg);
+    });
+});
 
 module.exports = router;

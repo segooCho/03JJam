@@ -29,6 +29,14 @@ POST /mealSearch
 POST /restaurantGroup
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.group                     :   Text =>     '' :  전체 목록 
+                                                     -location     : 구내식당,학생식당 등 
+                                                     -division     : 사진식단,('아침', '점심', '저녁')이 포함함
+                                                     -stapleFood   : 주식(밥,면)
+                                                     -soup         : 국
+                                                     -sideDish     : 반찬
+                                                     -dessert      : 없음(필수) 후식
+
 
 
 로그인
@@ -55,12 +63,29 @@ POST /restaurantSignUp
       =>certification   : 서버에서 처리 'n'
       =>notice          : 서버에서 처리 '공지사항'
 
+회원 수정
+POST /restaurantEdit
+    Req.Body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
+                                                     암호를 수정하고자 할때(별도 인증 없음)
+        03.businessNumber            :   Text =>     사업자 번호
+        04.companyName               :   Text =>     상호
+        05.address                   :   Text =>     주소
+        06.contactNumber             :   Text =>     연락처
+        07.representative            :   Text =>     대표자
+        08.editImage                 :   Text =>     기본 이미지 : "NoImageFound.jpg" 가 들어오면 기존 이미지 삭제
+                                                     *기존에 이미지가 등록되어 있는 경루 "NoImageFound.jpg" 시 파일 삭제 처리
+        09.businessLicenseImage      :   File =>     사업자 등록증 사진 (600 x 600 사이즈)
+      =>id              : 변경 불가
+      =>certification   : 서버에서 처리 'n'
+      =>notice          : 서버에서 처리 '공지사항'
 
 
 
 식단 등록
 POST /mealWrite
-    Req.Query.Parameter
+    Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.mealDate                  :   Text =>     날짜
         03.location                  :   Text =>     위치(기본으로 구내식당, 추후 : 교직원 식당, 학생 식당 등으로 사용)
@@ -80,7 +105,7 @@ POST /mealWrite
 
 식단 수정
 POST /mealEdit
-    Req.Query.Parameter
+    Req.body.Parameter
         01.meal_Id                   :   Text =>     _id(Meal Oid)
         02.mealDate                  :   Text =>     날짜
         03.location                  :   Text =>     위치(기본으로 구내식당, 추후 : 교직원 식당, 학생 식당 등으로 사용)
@@ -109,8 +134,34 @@ POST /mealDel
 
 식당 공지사항 수정 
 POST /restaurantNoticeEdit
-    Req.Query.Parameter
+    Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.notice                    :   Text =>     공지사항
 
 
+식당  항목(Group) 추가 
+POST /restaurantGroupAdd
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
+        03.text                      :   Text =>     입력 값
+                                                     -location     : 구내식당,학생식당 등 
+                                                     -division     : 사진식단,('아침', '점심', '저녁')이 포함함
+                                                     -stapleFood   : 주식(밥,면)
+                                                     -soup         : 국
+                                                     -sideDish     : 반찬
+                                                     -dessert      : 없음(필수) 후식
+                                                     *클라이언트에서 중복을 Check해서 전송한다.
+식당 항목(Group) 삭제 
+POST /restaurantGroupDel
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
+        03.text                      :   Text =>     입력 값
+                                                     -location     : 구내식당,학생식당 등 
+                                                     -division     : 사진식단,('아침', '점심', '저녁')이 포함함
+                                                     -stapleFood   : 주식(밥,면)
+                                                     -soup         : 국
+                                                     -sideDish     : 반찬
+                                                     -dessert      : 없음(필수) 후식
+                                                     *각 항목에 기본적으로 1가지는 있도록 클라이언트에서 Check한다.
