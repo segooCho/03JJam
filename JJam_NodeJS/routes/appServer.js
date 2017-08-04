@@ -52,7 +52,7 @@ router.post('/restaurantSearch', uploadSignUp.single(), function(req, res){
     //var testJson;
 
     Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}},{address:{$regex:req.body.searchText}}]}
-            ,{_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1}
+            ,{_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -72,7 +72,7 @@ router.post('/restaurantInfo', uploadSignUp.single(), function(req, res){
     sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
-            ,{_id:0, certification:1, notice:1}
+            ,{_id:0, certification:1, notice:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -157,7 +157,7 @@ router.post('/restaurantGroup', uploadSignUp.single(), function(req, res){
     console.log(dataQuery)
 
     Group.find({$and:[{restaurant_Id:req.body.restaurant_Id},dataQuery]}
-            ,{_id:0, restaurant_Id:1, group:1, text:1}
+            ,{_id:0, restaurant_Id:1, group:1, text:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -189,7 +189,7 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
             if (data.length>0) {
                 //패스워드 검사
                 Restaurant.find({$and:[{id:req.body.id},{password:req.body.password}]}
-                        , {_id:1}
+                        , {_id:1, androidRtn:1}
                         , function(err, data){
                     if (err) {
                         httpMsgs.show500(req, res, err);
@@ -212,6 +212,28 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
     });
 });
 
+
+/* POST : 회원 정보 조회 */
+router.post('/restaurantMember', uploadSignUp.single(), function(req, res){
+    sleep(500);
+
+    Restaurant.find({_id:req.body.restaurant_Id}
+            ,{}
+            ,{}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                var msg = "회원 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+                //httpMsgs.sendNoDataFound(req, res);
+            }
+        }        
+    });
+});
 
 /********************************  등록  ***********************************/
 
@@ -248,6 +270,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
                     businessLicenseImage    : (req.file) ? req.file.filename : "",
                     certification           : 'n',
                     notice                  : "공지사항",
+                    androidRtn              : '0',
                 });
 
                 restaurant.save(function(err, data){
@@ -268,25 +291,25 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
                     
                     //기본 메뉴 등록(category : 모델 생성이 안됨)
                     var bulk = Group.collection.initializeUnorderedBulkOp();
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'location',       text: '구내식당'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '아침'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-A'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-B'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '저녁'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '사진식단'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '쌀밥'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '콩밥'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '짜장면'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '된장국'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '미역국'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '소고기국'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김치'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '소고기'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '수육'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '콩나물'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '과일'});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '없음'});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'location',       text: '구내식당',     androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '아침',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-A',      androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '점심-B',      androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '저녁',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '사진식단',     androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '쌀밥',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '콩밥',       androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '짜장면',      androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '된장국',      androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '미역국',      androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '소고기국',     androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김치',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '소고기',       androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '수육',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김',          androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '콩나물',       androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '과일',        androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'dessert',        text: '없음',        androidRtn: "0"});
                     bulk.execute();
                 });
 
@@ -340,7 +363,8 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         sideDish4       : req.body.sideDish4,
         dessert         : req.body.dessert,
         remarks         : req.body.remarks,
-        foodImage       : (req.file) ? req.file.filename : ""
+        foodImage       : (req.file) ? req.file.filename : "",
+        androidRtn      : "0"
     });
     meal.save(function(err){
         //로그인 msg 멘트 변경시 iOS 수정 필요
@@ -359,8 +383,9 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 
     var group = new Group({
         restaurant_Id   : req.body.restaurant_Id,
-        group        : req.body.group,
+        group           : req.body.group,
         text            : req.body.text,
+        androidRtn      : '0',
     });
     group.save(function(err){
         //msg 멘트 변경시 iOS 수정 필요
@@ -373,8 +398,32 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 /********************************  수정  ***********************************/
 
 /* PUT : 회원 수정 */
-router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res){
+router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res) {
     sleep(500);
+    /*
+    console.log(req.body)
+    var query = { businessNumber : req.body.businessNumber };
+    var query2 = { companyName : req.body.companyName };
+    console.log(query)
+    console.log(query2)
+    Restaurant.update({_id : req.body.restaurant_Id}
+        , { $set : query }
+        , function(err){
+            //httpMsgs.sendNoDataFound(req, res);
+            //var msg = "회원 수정이 완료되었습니다."
+            //httpMsgs.sendMessageFound(req, res, msg);
+    });
+
+    Restaurant.update({_id : req.body.restaurant_Id}
+        , { $set : query2 }
+        , function(err){
+            //httpMsgs.sendNoDataFound(req, res);
+            var msg = "회원 수정이 완료되었습니다."
+            httpMsgs.sendMessageFound(req, res, msg);
+    });
+    */
+    
+    console.log(req.body)
 
     var query;
     Restaurant.findOne({_id : req.body.restaurant_Id}
@@ -384,6 +433,21 @@ router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), funct
             var msg = "존재하지 않는 Oid 입니다."
             httpMsgs.sendMessageFound(req, res, msg);
         } else {
+            //암호를 우선 처리
+            if (req.body.password != '') {
+                //암호 먼저 업데이트
+                query = {password            : req.body.password};
+                Restaurant.update({_id : req.body.restaurant_Id}
+                    , { $set : query }
+                    , function(err){
+                        if (err) {
+                            httpMsgs.show500(req, res, err);
+                        }                        
+                        console.log("암호 업데이트")
+                });
+            }
+
+            
             if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
                 if (data.businessLicenseImage != "") {
                     console.log('=> 파일 삭제');
@@ -393,57 +457,45 @@ router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), funct
                     //console.log('=>등록된 파일은 없음');
                 }
                 console.log('=> 등록 요청 파일 있음');
-                if (req.body.password != '') {
-                    query = {
-                        password                : req.body.password,
-                        businessNumber          : req.body.businessNumber,
-                        companyName             : req.body.companyName,
-                        address                 : req.body.address,
-                        contactNumber           : req.body.contactNumber,
-                        representative          : req.body.representative,
-                        businessLicenseImage    : (req.file) ? req.file.filename : "",
-                    };
-                } else {
-                    query = {
-                        businessNumber          : req.body.businessNumber,
-                        companyName             : req.body.companyName,
-                        address                 : req.body.address,
-                        contactNumber           : req.body.contactNumber,
-                        representative          : req.body.representative,
-                        businessLicenseImage    : (req.file) ? req.file.filename : "",
-                    };
-                }
+                query = {
+                    businessNumber          : req.body.businessNumber,
+                    companyName             : req.body.companyName,
+                    address                 : req.body.address,
+                    contactNumber           : req.body.contactNumber,
+                    representative          : req.body.representative,
+                    certification           : 'n',
+                    businessLicenseImage    : (req.file) ? req.file.filename : "",
+                };
+
+                Restaurant.update({_id : req.body.restaurant_Id}
+                    , { $set : query }
+                    , function(err){
+                        //로그인 msg 멘트 변경시 iOS 수정 필요
+                        var msg = "회원 수정이 완료되었습니다."
+                        httpMsgs.sendMessageFound(req, res, msg);
+                });
+
+
             } else {
                 console.log('=> 등록 요청 파일 없음');
-                if (req.body.password != '') {
-                    query = {
-                        password                : req.body.password,
-                        businessNumber          : req.body.businessNumber,
-                        companyName             : req.body.companyName,
-                        address                 : req.body.address,
-                        contactNumber           : req.body.contactNumber,
-                        representative          : req.body.representative,
-                    };
-                } else {
-                    query = {
-                        businessNumber          : req.body.businessNumber,
-                        companyName             : req.body.companyName,
-                        address                 : req.body.address,
-                        contactNumber           : req.body.contactNumber,
-                        representative          : req.body.representative,
-                    };
-                }
+                query = {
+                    businessNumber          : req.body.businessNumber,
+                    companyName             : req.body.companyName,
+                    address                 : req.body.address,
+                    contactNumber           : req.body.contactNumber,
+                    representative          : req.body.representative,
+                };
+                Restaurant.update({_id : req.body.restaurant_Id}
+                    , { $set : query }
+                    , function(err){
+                        //로그인 msg 멘트 변경시 iOS 수정 필요
+                        var msg = "회원 수정이 완료되었습니다."
+                        httpMsgs.sendMessageFound(req, res, msg);
+                });
             }
-
-            Restaurant.update({_id : req.body.restaurant_Id}
-                , { $set : query }
-                , function(err){
-                    //httpMsgs.sendNoDataFound(req, res);
-                    var msg = "회원 수정이 완료되었습니다."
-                    httpMsgs.sendMessageFound(req, res, msg);
-            });
         }
     });
+
 });
 
 /* PUT : 식단 수정 */

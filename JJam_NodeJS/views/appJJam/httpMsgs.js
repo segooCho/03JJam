@@ -39,7 +39,7 @@ exports.sendMessageFound = function (req, res, msg) {
     }
     else {
         res.writeHead(200,  { "Content-Type": "application/json" });
-        res.write(JSON.stringify([{ message: msg }]));
+        res.write(JSON.stringify([{ androidRtn: '-1' , message: msg }]));
     }
     res.end();
 };

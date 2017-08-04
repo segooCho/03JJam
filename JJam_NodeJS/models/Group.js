@@ -14,8 +14,9 @@ var Schema = mongoose.Schema;
 
 var GroupSchema = new Schema({
     restaurant_Id   : String,
-    group        : String,
+    group           : String,
     text            : String,
+    androidRtn      : String,
 });
 
 module.exports = mongoose.model('Group' , GroupSchema);

@@ -17,6 +17,7 @@ var MealSchema = new Schema({
     dessert         : String,
     remarks         : String,
     foodImage       : String,
+    androidRtn      : String,
     created_at : {
         type        : Date,
         default     : Date.now()

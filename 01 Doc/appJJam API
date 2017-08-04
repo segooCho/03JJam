@@ -45,6 +45,11 @@ Endpoint: http://127.0.0.1:3000/
         02.password                 :   Text =>     패스워스(hash: sha-256 digest(Hex)
 
 
+/* POST : 회원 정보 조회 */
+/restaurantMember
+    Req.body.Parameter
+        01.restaurant_Id            :   Text =>     _id(Restaurant Oid)
+
 
 /********************************  등록  ***********************************/
 
