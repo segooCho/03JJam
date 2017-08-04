@@ -43,6 +43,7 @@ var storage = multer.diskStorage({
 });
 var upload = multer({ storage: storage });
 
+/********************************  찾기  ***********************************/
 
 /* POST : 식당 찾기 */
 router.post('/restaurantSearch', uploadSignUp.single(), function(req, res){
@@ -210,13 +211,16 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
         }        
     });
 });
-/*==============================================================================================*/
+
+
+/********************************  등록  ***********************************/
+
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
     sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
-    console.log('req.body.id' , req.body.id); 
+    //console.log('req.body.id' , req.body.id); 
 
     Restaurant.find({id:req.body.id}
             , {}
@@ -294,8 +298,82 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
     });
 });
 
-/* POST : 회원 수정 */
-router.post('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res){
+
+/* POST : 식단 등록 */
+router.post('/mealWrite', upload.single('foodImage'), function(req, res){
+    sleep(500);
+    
+    //요일 찾기
+    var weekName = new Array('일','월','화','수','목','금','토'); 
+    var year = req.body.mealDate.substring(0,4);
+    var month = req.body.mealDate.substring(5,7);
+    var day = req.body.mealDate.substring(8,10);
+    var week = new Date(year, month-1, day, 0,0,0,0);               //month는 0~11까지임 
+    week = weekName[week.getDay()]; 
+  
+    //아침,점심,저녁으로 구분
+    var sort
+    if (req.body.division.indexOf('아침') > -1) {
+        sort = 0
+    } else if (req.body.division.indexOf('점심') > -1) {
+        sort = 1
+    } else if (req.body.division.indexOf('저녁') > -1) {
+        sort = 2
+    } else if (req.body.division.indexOf('사진식단') > -1) {
+        sort = 3
+    } else {
+        sort = 4
+    }
+
+    var meal = new Meal({
+        restaurant_Id   : req.body.restaurant_Id,
+        mealDate        : req.body.mealDate,
+        mealDateLabel   : week,
+        location        : req.body.location,
+        division        : req.body.division,
+        sort            : sort,
+        stapleFood      : req.body.stapleFood,
+        soup            : req.body.soup,
+        sideDish1       : req.body.sideDish1,
+        sideDish2       : req.body.sideDish2,
+        sideDish3       : req.body.sideDish3,
+        sideDish4       : req.body.sideDish4,
+        dessert         : req.body.dessert,
+        remarks         : req.body.remarks,
+        foodImage       : (req.file) ? req.file.filename : ""
+    });
+    meal.save(function(err){
+        //로그인 msg 멘트 변경시 iOS 수정 필요
+        var msg = "식단 저장이 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
+    });
+});
+
+
+/* POST : 식당 항목(Group) 추가  */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.post('/restaurantGroupAdd', upload.single(), function(req, res){
+    sleep(500);
+
+    console.log(req.body)
+
+    var group = new Group({
+        restaurant_Id   : req.body.restaurant_Id,
+        group        : req.body.group,
+        text            : req.body.text,
+    });
+    group.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
+        httpMsgs.sendMessageFound(req, res, msg);
+    });
+});
+
+
+/********************************  수정  ***********************************/
+
+/* PUT : 회원 수정 */
+router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res){
     sleep(500);
 
     var query;
@@ -368,59 +446,8 @@ router.post('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), func
     });
 });
 
-
-/* POST : 식단 등록 */
-router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    sleep(500);
-    
-    //요일 찾기
-    var weekName = new Array('일','월','화','수','목','금','토'); 
-    var year = req.body.mealDate.substring(0,4);
-    var month = req.body.mealDate.substring(5,7);
-    var day = req.body.mealDate.substring(8,10);
-    var week = new Date(year, month-1, day, 0,0,0,0);               //month는 0~11까지임 
-    week = weekName[week.getDay()]; 
-  
-    //아침,점심,저녁으로 구분
-    var sort
-    if (req.body.division.indexOf('아침') > -1) {
-        sort = 0
-    } else if (req.body.division.indexOf('점심') > -1) {
-        sort = 1
-    } else if (req.body.division.indexOf('저녁') > -1) {
-        sort = 2
-    } else if (req.body.division.indexOf('사진식단') > -1) {
-        sort = 3
-    } else {
-        sort = 4
-    }
-
-    var meal = new Meal({
-        restaurant_Id   : req.body.restaurant_Id,
-        mealDate        : req.body.mealDate,
-        mealDateLabel   : week,
-        location        : req.body.location,
-        division        : req.body.division,
-        sort            : sort,
-        stapleFood      : req.body.stapleFood,
-        soup            : req.body.soup,
-        sideDish1       : req.body.sideDish1,
-        sideDish2       : req.body.sideDish2,
-        sideDish3       : req.body.sideDish3,
-        sideDish4       : req.body.sideDish4,
-        dessert         : req.body.dessert,
-        remarks         : req.body.remarks,
-        foodImage       : (req.file) ? req.file.filename : ""
-    });
-    meal.save(function(err){
-        //로그인 msg 멘트 변경시 iOS 수정 필요
-        var msg = "식단 저장이 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
-    });
-});
-
-/* POST : 식단 수정 */
-router.post('/mealEdit', upload.single('foodImage'), function(req, res){
+/* PUT : 식단 수정 */
+router.put('/mealEdit', upload.single('foodImage'), function(req, res){
     sleep(500);
     //console.log(req.body);
 
@@ -507,9 +534,9 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
     });
 });
 
-/* POST : 식단 삭제 */
+/* PUT : 식당 공지사항 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
+router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
     sleep(500);
 
     //console.log(req.body.restaurant_Id)
@@ -528,7 +555,12 @@ router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
     });
 
 });
-router.post('/mealDel', upload.single(), function(req, res){
+
+/********************************  삭제  ***********************************/
+
+/* DELETE : 식단 삭제 */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.delete('/mealDel', upload.single(), function(req, res){
     sleep(500);
     //console.log(req.query._id)
 
@@ -557,50 +589,9 @@ router.post('/mealDel', upload.single(), function(req, res){
     });
 });
 
-/* POST : 식당 공지사항 수정 */
+/* DELETE : 식당 항목 (Group) 삭제  */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.post('/restaurantNoticeEdit', upload.single(), function(req, res){
-    sleep(500);
-
-    //console.log(req.body.restaurant_Id)
-    //console.log(req.body.notice)
-
-    var query = {
-        notice        : req.body.notice
-    };
-
-    Restaurant.update({_id : req.body.restaurant_Id}, 
-                { $set : query },
-    function(err){
-        //httpMsgs.sendNoDataFound(req, res);
-        var msg = "저장 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
-    });
-
-});
-
-/* POST : 식당 항목(Group) 추가  */
-// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.post('/restaurantGroupAdd', upload.single(), function(req, res){
-    sleep(500);
-
-    console.log(req.body)
-
-    var group = new Group({
-        restaurant_Id   : req.body.restaurant_Id,
-        group        : req.body.group,
-        text            : req.body.text,
-    });
-    group.save(function(err){
-        //msg 멘트 변경시 iOS 수정 필요
-        var msg = "저장이 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
-    });
-});
-
-/* POST : 식당 항목 (Group) 삭제  */
-// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.post('/restaurantGroupDel', upload.single(), function(req, res){
+router.delete('/restaurantGroupDel', upload.single(), function(req, res){
     sleep(500);
 
     console.log(req.body)
@@ -614,5 +605,4 @@ router.post('/restaurantGroupDel', upload.single(), function(req, res){
             httpMsgs.sendMessageFound(req, res, msg);
     });
 });
-
 module.exports = router;

@@ -5,28 +5,28 @@ Endpoint: http://127.0.0.1:3000/
 /********************************  찾기  ***********************************/
 
 
-
-관심 식당 찾기
-POST /restaurantSearch
+/* POST : 식당 찾기 */
+/restaurantSearch
     Req.Body.Parameter
         01.searchText                :   Text =>     검색어 (주소 & 상호)
 
-식당 인증 & 공지사항
-POST /restaurantInfo
+
+/* POST : 식당 인증 & 공지사항 */
+/restaurantInfo
     Req.Body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
 
 
-식단 조회
-POST /mealSearch
+/* POST : 식단 조회 */
+/mealSearch
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.segmentedId               :   Text =>     오늘 식단(0):오늘 만   
                                                      계회 식단(1):오늘 이후  
                                                      과거 식단(2):오늘 이전 
 
-식당 category 항목(Group) 조회
-POST /restaurantGroup
+/* POST : 식당 항목(Group) 조회 */
+/restaurantGroup
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.group                     :   Text =>     '' :  전체 목록 
@@ -38,9 +38,8 @@ POST /restaurantGroup
                                                      -dessert      : 없음(필수) 후식
 
 
-
-로그인
-POST /restaurantLogin
+/* POST : 로그인 */
+/restaurantLogin
     Req.body.Parameter
         01.id                       :   Text =>     id(사용자 입력 ID)
         02.password                 :   Text =>     패스워스(hash: sha-256 digest(Hex)
@@ -49,8 +48,8 @@ POST /restaurantLogin
 
 /********************************  등록  ***********************************/
 
-회원 가입
-POST /restaurantSignUp
+/* POST : 회원 가입 */
+/restaurantSignUp
     Req.Body.Parameter
         01.id                        :   Text =>     id(사용자 입력 ID)
         02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
@@ -63,28 +62,10 @@ POST /restaurantSignUp
       =>certification   : 서버에서 처리 'n'
       =>notice          : 서버에서 처리 '공지사항'
 
-회원 수정
-POST /restaurantEdit
-    Req.Body.Parameter
-        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
-        02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
-                                                     암호를 수정하고자 할때(별도 인증 없음)
-        03.businessNumber            :   Text =>     사업자 번호
-        04.companyName               :   Text =>     상호
-        05.address                   :   Text =>     주소
-        06.contactNumber             :   Text =>     연락처
-        07.representative            :   Text =>     대표자
-        08.editImage                 :   Text =>     기본 이미지 : "NoImageFound.jpg" 가 들어오면 기존 이미지 삭제
-                                                     *기존에 이미지가 등록되어 있는 경루 "NoImageFound.jpg" 시 파일 삭제 처리
-        09.businessLicenseImage      :   File =>     사업자 등록증 사진 (600 x 600 사이즈)
-      =>id              : 변경 불가
-      =>certification   : 서버에서 처리 'n'
-      =>notice          : 서버에서 처리 '공지사항'
 
 
-
-식단 등록
-POST /mealWrite
+/* POST : 식단 등록 */
+/mealWrite
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.mealDate                  :   Text =>     날짜
@@ -103,8 +84,45 @@ POST /mealWrite
       =>mealDateLabel   : 날짜 기준으로 서버에서 처리
       =>sort            : division의 문자열 중 '아침,점심,저녁' 을 이용하여 서버에서 처리
 
-식단 수정
-POST /mealEdit
+
+/* POST : 식당 항목(Group) 추가  */
+/restaurantGroupAdd
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
+        03.text                      :   Text =>     입력 값
+                                                     -location     : 구내식당,학생식당 등 
+                                                     -division     : 사진식단,('아침', '점심', '저녁')이 포함함
+                                                     -stapleFood   : 주식(밥,면)
+                                                     -soup         : 국
+                                                     -sideDish     : 반찬
+                                                     -dessert      : 없음(필수) 후식
+                                                     *클라이언트에서 중복을 Check해서 전송한다.
+
+
+/********************************  수정  ***********************************/
+
+/* PUT : 회원 수정 */
+/restaurantEdit
+    Req.Body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.password                  :   Text =>     비밀번호(hash: sha-256 digest(Hex)
+                                                     암호를 수정하고자 할때(별도 인증 없음)
+        03.businessNumber            :   Text =>     사업자 번호
+        04.companyName               :   Text =>     상호
+        05.address                   :   Text =>     주소
+        06.contactNumber             :   Text =>     연락처
+        07.representative            :   Text =>     대표자
+        08.editImage                 :   Text =>     기본 이미지 : "NoImageFound.jpg" 가 들어오면 기존 이미지 삭제
+                                                     *기존에 이미지가 등록되어 있는 경루 "NoImageFound.jpg" 시 파일 삭제 처리
+        09.businessLicenseImage      :   File =>     사업자 등록증 사진 (600 x 600 사이즈)
+      =>id              : 변경 불가
+      =>certification   : 서버에서 처리 'n'
+      =>notice          : 서버에서 처리 '공지사항'
+
+
+/* PUT : 식단 수정 */
+/mealEdit
     Req.body.Parameter
         01.meal_Id                   :   Text =>     _id(Meal Oid)
         02.mealDate                  :   Text =>     날짜
@@ -126,34 +144,23 @@ POST /mealEdit
       =>sort            : division의 문자열 중 '아침,점심,저녁' 을 이용하여 서버에서 처리
 
 
-식단 삭제 
-POST /mealDel
-    Req.body.Parameter
-        01.meal_Id                   :   Text =>     _id(Meal Oid)
-
-
-식당 공지사항 수정 
-POST /restaurantNoticeEdit
+/* PUT : 식당 공지사항 수정 */
+/restaurantNoticeEdit
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.notice                    :   Text =>     공지사항
 
 
-식당  항목(Group) 추가 
-POST /restaurantGroupAdd
+/********************************  삭제  ***********************************/
+
+/* DELETE : 식단 삭제 */
+DELETE /mealDel
     Req.body.Parameter
-        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
-        02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
-        03.text                      :   Text =>     입력 값
-                                                     -location     : 구내식당,학생식당 등 
-                                                     -division     : 사진식단,('아침', '점심', '저녁')이 포함함
-                                                     -stapleFood   : 주식(밥,면)
-                                                     -soup         : 국
-                                                     -sideDish     : 반찬
-                                                     -dessert      : 없음(필수) 후식
-                                                     *클라이언트에서 중복을 Check해서 전송한다.
-식당 항목(Group) 삭제 
-POST /restaurantGroupDel
+        01.meal_Id                   :   Text =>     _id(Meal Oid)
+
+
+/* DELETE : 식당 항목 (Group) 삭제  */
+/restaurantGroupDel
     Req.body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
@@ -165,3 +172,5 @@ POST /restaurantGroupDel
                                                      -sideDish     : 반찬
                                                      -dessert      : 없음(필수) 후식
                                                      *각 항목에 기본적으로 1가지는 있도록 클라이언트에서 Check한다.
+
+
