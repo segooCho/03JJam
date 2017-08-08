@@ -5,6 +5,7 @@ var router = express.Router();
 var Restaurant = require('../models/Restaurant');   //식당 회원 정보
 var Group = require('../models/Group');             //식당의 메뉴 관리*(category : 모델 생성이 안됨)
 var Meal = require('../models/Meal');               //식단 정보
+var Like = require('../models/Like');               //좋아요 정보
 
 // hash
 var crypto = require('crypto');
@@ -102,29 +103,29 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
 
     //segmentedId 구분 처리
     //dataQuery 는 ',' 로 연결이 안됨 다중 처리시 신규 생성을 해야함용
-    var dateQuery1 = {};
-    var dateQuery2 = {};
+    var dataQuery1 = {};
+    var dataQuery2 = {};
     var msgSegmented = ""
     if (req.body.segmentedId == 0) {
-        dateQuery1 = {mealDate:{$eq:today}};             //오늘
-        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$eq:today}};             //오늘
+        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "오늘"
     } else if (req.body.segmentedId == 1) {
-        dateQuery1 = {mealDate:{$gt:today}};             //계획
-        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$gt:today}};             //계획
+        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "계획"
     } else if (req.body.segmentedId == 2) {
-        dateQuery1 = {mealDate:{$lt:today}};             //과거
-        dateQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$lt:today}};             //과거
+        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "과거"
     } else if (req.body.segmentedId == 3) {
-        dateQuery1 = {division:'사진식단'};                          //사진식단
-        dateQuery2 = {division:'사진식단'};                          //sort
+        dataQuery1 = {division:'사진식단'};                          //사진식단
+        dataQuery2 = {division:'사진식단'};                          //sort
         msgSegmented = "사진"
     }
-    //console.log(dateQuery1);
+    //console.log(dataQuery1);
 
-    Meal.find({$and:[{restaurant_Id:req.body.restaurant_Id}, dateQuery1, dateQuery2]}
+    Meal.find({$and:[{restaurant_Id:req.body.restaurant_Id}, dataQuery1, dataQuery2]}
             ,{}
             ,{}
             , function(err, data){
@@ -141,8 +142,73 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
         }        
     })
     .sort({"mealDate":1,"location":1,"sort":1,"division":1})    //-1:내림 차순, 1:오늘 차순
-    .limit(30)                                                  //제한 30
-    ;
+    .limit(30);                                                  //제한 30
+
+    /*  lookupQuery 방식 
+    var lookupQuery = {
+        $lookup: {  from: "likes"
+                    ,localField: "_id"          //ObjectId 타입이 같아야 됨
+                    ,foreignField: "meal_Id"    //meal_Id 스키마를 String => Schema.Types.ObjectId 
+                    ,as: "likeDocs" 
+                 }
+    };
+   
+    Meal.aggregate([
+                    lookupQuery
+                    ,{ $match: 
+                        {$and:[
+                            {restaurant_Id: req.body.restaurant_Id}, dataQuery1, dataQuery2
+                              ]
+                         }
+                     }
+                    ,{
+                      $project: {
+                         restaurant_Id   : 1,
+                         mealDate        : 1,
+                         mealDateLabel   : 1,
+                         location        : 1,
+                         division        : 1,
+                         sort            : 1,
+                         stapleFood      : 1,
+                         soup            : 1,
+                         sideDish1       : 1,
+                         sideDish2       : 1,
+                         sideDish3       : 1,
+                         sideDish4       : 1,
+                         dessert         : 1,
+                         remarks         : 1,
+                         foodImage       : 1,
+                         like            : 1,
+                         androidRtn      : 1,
+                         likeDocs: {
+                            $filter: {
+                               input: "$likeDocs",
+                               as: "likeDoc",
+                               cond: { $eq : ["$$likeDoc.uniqueId", "123"]}
+                            }
+                         }
+                      }
+                    }
+                    ,{$sort : {"mealDate":1,"location":1,"sort":1,"division":1}}    //-1:내림 차순, 1:오늘 차순
+                    ,{ $limit : 30 }                                                //제한 30
+                   ]
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            console.log(data)
+
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                var msg = msgSegmented + " 식단 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+                //httpMsgs.sendNoDataFound(req, res);
+            }
+        }     
+    });
+    */
+
 });
 
 /* POST : 식당 항목(Group) 조회 */
@@ -235,6 +301,37 @@ router.post('/restaurantMember', uploadSignUp.single(), function(req, res){
     });
 });
 
+/* POST : 식단 맛있어요 카운터  */
+router.post('/mealLikeCount', uploadSignUp.single(), function(req, res){
+    sleep(500);
+
+    var cnt = 0;
+    Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            cnt = data;
+        }        
+    });
+
+    Like.count({$and:[{meal_Id : req.body.meal_Id}
+                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            //console.log(data);
+            if (data > 0) {
+                //console.log("y");
+                httpMsgs.sendLikeCountFound(req, res, "y", cnt);
+            } else {
+                //console.log("n");
+                httpMsgs.sendLikeCountFound(req, res, "n", cnt);
+            }
+        }        
+    });
+
+
+});
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -363,6 +460,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         sideDish4       : req.body.sideDish4,
         dessert         : req.body.dessert,
         remarks         : req.body.remarks,
+        like            : 0,
         foodImage       : (req.file) ? req.file.filename : "",
         androidRtn      : "0"
     });
@@ -400,30 +498,8 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 /* PUT : 회원 수정 */
 router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res) {
     sleep(500);
-    /*
-    console.log(req.body)
-    var query = { businessNumber : req.body.businessNumber };
-    var query2 = { companyName : req.body.companyName };
-    console.log(query)
-    console.log(query2)
-    Restaurant.update({_id : req.body.restaurant_Id}
-        , { $set : query }
-        , function(err){
-            //httpMsgs.sendNoDataFound(req, res);
-            //var msg = "회원 수정이 완료되었습니다."
-            //httpMsgs.sendMessageFound(req, res, msg);
-    });
-
-    Restaurant.update({_id : req.body.restaurant_Id}
-        , { $set : query2 }
-        , function(err){
-            //httpMsgs.sendNoDataFound(req, res);
-            var msg = "회원 수정이 완료되었습니다."
-            httpMsgs.sendMessageFound(req, res, msg);
-    });
-    */
-    
-    console.log(req.body)
+   
+    //console.log(req.body)
 
     var query;
     Restaurant.findOne({_id : req.body.restaurant_Id}
@@ -608,15 +684,75 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
 
 });
 
+/* PUT : 식단 맛있어요 */
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
+router.put('/mealLike', upload.single(), function(req, res){
+    sleep(500);
+
+    console.log(req.body.meal_Id)
+
+    Like.findOne({uniqueId : req.body.uniqueId}
+        , function(err, data){
+        //like    
+        if (data == null) {
+            //수량 업
+            Meal.update({_id : req.body.meal_Id}
+                        ,{$inc : {like: 1}}
+                        ,function(err){
+                    //console.log(data)
+                //httpMsgs.sendNoDataFound(req, res);
+                //var msg = "설정되었습니다."
+                //httpMsgs.sendMessageFound(req, res, msg);
+            });
+
+            //
+            var like = new Like({
+                meal_Id         : req.body.meal_Id,
+                uniqueId        : req.body.uniqueId,
+                androidRtn      : '0',
+            });
+
+            like.save(function(err){
+                //msg 멘트 변경시 iOS 수정 필요
+                var msg = "맛있어요 설정되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            });
+
+        } else {
+        //UnLike
+           
+            //수량 업
+            Meal.update({_id : req.body.meal_Id}
+                        ,{$inc : {like: -1}}
+                        ,function(err){
+                console.log(err)
+                //httpMsgs.sendNoDataFound(req, res);
+                var msg = "해제되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            });
+            
+            Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                              ,{uniqueId: req.body.uniqueId}]}
+                , function(err){
+                    //msg 멘트 변경시 iOS 수정 필요
+                    var msg = "맛있어요 해제되었습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+            });
+
+        }
+
+    });
+
+});
 /********************************  삭제  ***********************************/
 
 /* DELETE : 식단 삭제 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
-router.delete('/mealDel', upload.single(), function(req, res){
+router.delete('/mealDel', function(req, res){
     sleep(500);
-    //console.log(req.query._id)
+    console.log(req.query.meal_Id)
 
-    Meal.findOne({_id : req.body.meal_Id}
+    Meal.findOne({_id : req.query.meal_Id}
         , function(err, data){
             if (err) {
                 httpMsgs.show500(req, res, err);
@@ -629,7 +765,7 @@ router.delete('/mealDel', upload.single(), function(req, res){
                             //console.log('=> 파일 삭제');
                             fs.unlinkSync(uploadDir + '/' + data.foodImage);
                         }
-                        Meal.remove({_id : req.body.meal_Id}
+                        Meal.remove({_id : req.query.meal_Id}
                             , function(err){
                                 //로그인 msg 멘트 변경시 iOS 수정 필요
                                 var msg = "식단 삭제가 완료되었습니다."
@@ -646,11 +782,11 @@ router.delete('/mealDel', upload.single(), function(req, res){
 router.delete('/restaurantGroupDel', upload.single(), function(req, res){
     sleep(500);
 
-    console.log(req.body)
+    //console.log(req.body)
 
-    Group.remove({$and:[{restaurant_Id : req.body.restaurant_Id}
-                       ,{group: req.body.group}
-                       ,{text: req.body.text}]}
+    Group.remove({$and:[{restaurant_Id : req.query.restaurant_Id}
+                       ,{group: req.query.group}
+                       ,{text: req.query.text}]}
         , function(err){
             //msg 멘트 변경시 iOS 수정 필요
             var msg = "삭제가 완료되었습니다."

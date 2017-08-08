@@ -32,6 +32,18 @@ exports.sendNoDataFound = function (req, res) {
     res.end();
 };
 
+exports.sendLikeCountFound = function (req, res, check, cnt) {
+    if (settings.httpMsgFormat === "HTML") {
+        res.writeHead(200,  { "Content-Type": "text/html" });
+        res.write("<html><head><title>" + check + "</title></head><body>" + check + "</body></html>")
+    }
+    else {
+        res.writeHead(200,  { "Content-Type": "application/json" });
+        res.write(JSON.stringify([{ androidRtn: '-1' , check: check, cnt: cnt }]));
+    }
+    res.end();
+};
+
 exports.sendMessageFound = function (req, res, msg) {
     if (settings.httpMsgFormat === "HTML") {
         res.writeHead(200,  { "Content-Type": "text/html" });

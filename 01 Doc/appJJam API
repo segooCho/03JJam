@@ -51,6 +51,12 @@ Endpoint: http://127.0.0.1:3000/
         01.restaurant_Id            :   Text =>     _id(Restaurant Oid)
 
 
+/* POST : 식단 맛있어요 카운터  */
+/mealLikeCount
+    Req.body.Parameter
+        01.meal_Id                   :   Text =>     _id(Meal Oid)
+        02.uniqueId                  :   Text =>     휴대전화 고유UUid
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -88,6 +94,7 @@ Endpoint: http://127.0.0.1:3000/
         12.foodImage                 :   File =>     사진 (600 x 600 사이즈)
       =>mealDateLabel   : 날짜 기준으로 서버에서 처리
       =>sort            : division의 문자열 중 '아침,점심,저녁' 을 이용하여 서버에서 처리
+      =>like            : Number(기본 : 0)
 
 
 /* POST : 식당 항목(Group) 추가  */
@@ -156,17 +163,24 @@ Endpoint: http://127.0.0.1:3000/
         02.notice                    :   Text =>     공지사항
 
 
+/* PUT : 식단 맛있어요 */
+/mealLike
+    Req.body.Parameter
+        01.meal_Id                   :   Text =>     _id(Meal Oid)
+        02.uniqueId                  :   Text =>     휴대전화 고유UUid
+
+
 /********************************  삭제  ***********************************/
 
 /* DELETE : 식단 삭제 */
 DELETE /mealDel
-    Req.body.Parameter
+    Req.query.Parameter
         01.meal_Id                   :   Text =>     _id(Meal Oid)
 
 
 /* DELETE : 식당 항목 (Group) 삭제  */
 /restaurantGroupDel
-    Req.body.Parameter
+    Req.query.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
         02.group                     :   Text =>     location,division,stapleFood,soup,sideDish,dessert
         03.text                      :   Text =>     입력 값
