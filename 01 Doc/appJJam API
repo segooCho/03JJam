@@ -163,7 +163,7 @@ Endpoint: http://127.0.0.1:3000/
         02.notice                    :   Text =>     공지사항
 
 
-/* PUT : 식단 맛있어요 */
+/* PUT : 식단 맛있어요 설정/해제 */
 /mealLike
     Req.body.Parameter
         01.meal_Id                   :   Text =>     _id(Meal Oid)

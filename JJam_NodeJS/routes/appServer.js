@@ -305,6 +305,8 @@ router.post('/restaurantMember', uploadSignUp.single(), function(req, res){
 router.post('/mealLikeCount', uploadSignUp.single(), function(req, res){
     sleep(500);
 
+    console.log(req.body)
+
     var cnt = 0;
     Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
         if (err) {
@@ -329,7 +331,9 @@ router.post('/mealLikeCount', uploadSignUp.single(), function(req, res){
             }
         }        
     });
-
+    
+    //기본 세팅
+    //httpMsgs.sendLikeCountFound(req, res, "n", cnt);
 
 });
 /********************************  등록  ***********************************/
@@ -684,28 +688,114 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
 
 });
 
-/* PUT : 식단 맛있어요 */
+/* PUT : 식단 맛있어요 설정/해제 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.put('/mealLike', upload.single(), function(req, res){
     sleep(500);
 
-    console.log(req.body.meal_Id)
-
-    Like.findOne({uniqueId : req.body.uniqueId}
-        , function(err, data){
+    //console.log(req.body.meal_Id)
+    
+    Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                ,{uniqueId: req.body.uniqueId}]}
+                ,function(err, data){
         //like    
         if (data == null) {
-            //수량 업
-            Meal.update({_id : req.body.meal_Id}
-                        ,{$inc : {like: 1}}
-                        ,function(err){
-                    //console.log(data)
-                //httpMsgs.sendNoDataFound(req, res);
-                //var msg = "설정되었습니다."
-                //httpMsgs.sendMessageFound(req, res, msg);
+            // 신규 등록
+            var like = new Like({
+                meal_Id         : req.body.meal_Id,
+                uniqueId        : req.body.uniqueId,
+                androidRtn      : '0',
             });
 
-            //
+            like.save(function(err){
+                console.log("save")
+                //msg 멘트 변경시 iOS 수정 필요
+                var msg = "맛있어요 설정되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            });
+        } else {
+            Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                              ,{uniqueId: req.body.uniqueId}]}
+                , function(err){
+                console.log("remove")
+                    //msg 멘트 변경시 iOS 수정 필요
+                    var msg = "맛있어요 해제되었습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+            });
+        }
+    });
+
+    /*
+    sleep(500);
+
+    var cnt = 0;
+    Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            cnt = data;
+        }        
+    });
+
+    Like.count({$and:[{meal_Id : req.body.meal_Id}
+                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            //console.log(data);
+            if (data > 0) {
+                //console.log("y");
+                httpMsgs.sendLikeCountFound(req, res, "y", cnt);
+            } else {
+                //console.log("n");
+                httpMsgs.sendLikeCountFound(req, res, "n", cnt);
+            }
+        }        
+    });
+    */
+
+    /*
+    if (req.body.like == 'y') {
+        Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                    ,{uniqueId: req.body.uniqueId}]}
+                    ,function(err, data){
+            //like    
+            if (data == null) {
+                // 신규 등록
+                var like = new Like({
+                    meal_Id         : req.body.meal_Id,
+                    uniqueId        : req.body.uniqueId,
+                    androidRtn      : '0',
+                });
+
+                like.save(function(err){
+                    //msg 멘트 변경시 iOS 수정 필요
+                    var msg = "맛있어요 설정되었습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+                });
+            } else {
+                var msg = "맛있어요 설정되었습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        });
+    } else {
+            Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                              ,{uniqueId: req.body.uniqueId}]}
+                , function(err){
+                    //msg 멘트 변경시 iOS 수정 필요
+                    var msg = "맛있어요 해제되었습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+            });
+    }
+    */
+
+    /*
+    Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                ,{uniqueId: req.body.uniqueId}]}
+                ,function(err, data){
+        //like    
+        if (data == null) {
+            // 신규 등록
             var like = new Like({
                 meal_Id         : req.body.meal_Id,
                 uniqueId        : req.body.uniqueId,
@@ -719,18 +809,7 @@ router.put('/mealLike', upload.single(), function(req, res){
             });
 
         } else {
-        //UnLike
-           
-            //수량 업
-            Meal.update({_id : req.body.meal_Id}
-                        ,{$inc : {like: -1}}
-                        ,function(err){
-                console.log(err)
-                //httpMsgs.sendNoDataFound(req, res);
-                var msg = "해제되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            });
-            
+        //UnLike           
             Like.remove({$and:[{meal_Id : req.body.meal_Id}
                               ,{uniqueId: req.body.uniqueId}]}
                 , function(err){
@@ -742,6 +821,7 @@ router.put('/mealLike', upload.single(), function(req, res){
         }
 
     });
+    */
 
 });
 /********************************  삭제  ***********************************/
