@@ -416,7 +416,7 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
 
                 //msg 멘트 변경시 iOS 수정 필요
                 var msg = "회원 가입이 완료되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
+                httpMsgs.sendMessageZeroFound(req, res, msg);
             }
         }        
     });
@@ -471,7 +471,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     meal.save(function(err){
         //로그인 msg 멘트 변경시 iOS 수정 필요
         var msg = "식단 저장이 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
+        httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 });
 
@@ -492,7 +492,7 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
     group.save(function(err){
         //msg 멘트 변경시 iOS 수정 필요
         var msg = "저장이 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
+        httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 });
 
@@ -552,7 +552,7 @@ router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), funct
                     , function(err){
                         //로그인 msg 멘트 변경시 iOS 수정 필요
                         var msg = "회원 수정이 완료되었습니다."
-                        httpMsgs.sendMessageFound(req, res, msg);
+                        httpMsgs.sendMessageZeroFound(req, res, msg);
                 });
 
 
@@ -570,7 +570,7 @@ router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), funct
                     , function(err){
                         //로그인 msg 멘트 변경시 iOS 수정 필요
                         var msg = "회원 수정이 완료되었습니다."
-                        httpMsgs.sendMessageFound(req, res, msg);
+                        httpMsgs.sendMessageZeroFound(req, res, msg);
                 });
             }
         }
@@ -660,7 +660,7 @@ router.put('/mealEdit', upload.single('foodImage'), function(req, res){
             function(err){
                 //로그인 msg 멘트 변경시 iOS 수정 필요
                 var msg = "식단 저장이 완료되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
+                httpMsgs.sendMessageZeroFound(req, res, msg);
             });
         }
     });
@@ -683,7 +683,7 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
     function(err){
         //httpMsgs.sendNoDataFound(req, res);
         var msg = "저장 완료되었습니다."
-        httpMsgs.sendMessageFound(req, res, msg);
+        httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 
 });
@@ -711,7 +711,7 @@ router.put('/mealLike', upload.single(), function(req, res){
                 console.log("save")
                 //msg 멘트 변경시 iOS 수정 필요
                 var msg = "맛있어요 설정되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
+                httpMsgs.sendMessageZeroFound(req, res, msg);
             });
         } else {
             Like.remove({$and:[{meal_Id : req.body.meal_Id}
@@ -720,7 +720,7 @@ router.put('/mealLike', upload.single(), function(req, res){
                 console.log("remove")
                     //msg 멘트 변경시 iOS 수정 필요
                     var msg = "맛있어요 해제되었습니다."
-                    httpMsgs.sendMessageFound(req, res, msg);
+                    httpMsgs.sendMessageZeroFound(req, res, msg);
             });
         }
     });
@@ -849,7 +849,7 @@ router.delete('/mealDel', function(req, res){
                             , function(err){
                                 //로그인 msg 멘트 변경시 iOS 수정 필요
                                 var msg = "식단 삭제가 완료되었습니다."
-                                httpMsgs.sendMessageFound(req, res, msg);
+                                httpMsgs.sendMessageZeroFound(req, res, msg);
                         });
 
                     }
@@ -870,7 +870,7 @@ router.delete('/restaurantGroupDel', upload.single(), function(req, res){
         , function(err){
             //msg 멘트 변경시 iOS 수정 필요
             var msg = "삭제가 완료되었습니다."
-            httpMsgs.sendMessageFound(req, res, msg);
+            httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 });
 module.exports = router;

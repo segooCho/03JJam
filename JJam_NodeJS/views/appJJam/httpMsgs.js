@@ -56,6 +56,19 @@ exports.sendMessageFound = function (req, res, msg) {
     res.end();
 };
 
+//안드로이드 Message 정상 처리
+exports.sendMessageZeroFound = function (req, res, msg) {
+    if (settings.httpMsgFormat === "HTML") {
+        res.writeHead(200,  { "Content-Type": "text/html" });
+        res.write("<html><head><title>" + msg + "</title></head><body>" + msg + "</body></html>")
+    }
+    else {
+        res.writeHead(200,  { "Content-Type": "application/json" });
+        res.write(JSON.stringify([{ androidRtn: '0' , message: msg }]));
+    }
+    res.end();
+};
+
 exports.show400 = function (req, res) {
     if (settings.httpMsgFormat === "HTML") {
         res.writeHead(400, "Bad Request", { "Content-Type": "text/html" });
