@@ -107,15 +107,15 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
     var dataQuery2 = {};
     var msgSegmented = ""
     if (req.body.segmentedId == 0) {
-        dataQuery1 = {mealDate:{$eq:today}};             //오늘
+        dataQuery1 = {mealDate:{$eq:today}};                       //오늘
         dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "오늘"
     } else if (req.body.segmentedId == 1) {
-        dataQuery1 = {mealDate:{$gt:today}};             //계획
+        dataQuery1 = {mealDate:{$gt:today}};                       //계획
         dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "계획"
     } else if (req.body.segmentedId == 2) {
-        dataQuery1 = {mealDate:{$lt:today}};             //과거
+        dataQuery1 = {mealDate:{$lt:today}};                       //과거
         dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
         msgSegmented = "과거"
     } else if (req.body.segmentedId == 3) {
