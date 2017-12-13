@@ -17,21 +17,23 @@ var httpMsgs = require('../views/appJJam/httpMsgs.js');
 // 파일 저장되는 위치 설정
 var path = require('path');
 var uploadDir = path.join( __dirname , '../uploads' );
-var uploadSignUpDir = path.join( __dirname , '../uploadsSignUp' );
+var uploadsSignUpDir = path.join( __dirname , '../uploadsSignUp' );
 var fs = require('fs');
 
 //multer 셋팅
 var multer  = require('multer');
+
 //회원 가입 이미지
 var storageSignUp = multer.diskStorage({
     destination : function (req, file, callback) {
-        callback(null, uploadSignUpDir );
+        callback(null, uploadsSignUpDir );
     },
     filename : function (req, file, callback) {
         callback(null, 'file-' + Date.now() + '.'+ file.mimetype.split('/')[1] );
     }
 });
-var uploadSignUp = multer({ storage: storageSignUp });
+
+var uploadsSignUp = multer({ storage: storageSignUp });
 
 //식단 저장 이미지
 var storage = multer.diskStorage({
@@ -47,7 +49,7 @@ var upload = multer({ storage: storage });
 /********************************  찾기  ***********************************/
 
 /* POST : 식당 찾기 */
-router.post('/restaurantSearch', uploadSignUp.single(), function(req, res){
+router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
     sleep(500);
     //console.log(req.body.searchText);
     //var testJson;
@@ -69,7 +71,7 @@ router.post('/restaurantSearch', uploadSignUp.single(), function(req, res){
 });
 
 /* POST : 식당 인증 & 공지사항 */
-router.post('/restaurantInfo', uploadSignUp.single(), function(req, res){
+router.post('/restaurantInfo', uploadsSignUp.single(), function(req, res){
     sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
@@ -89,7 +91,7 @@ router.post('/restaurantInfo', uploadSignUp.single(), function(req, res){
 });
 
 /* POST : 식단 조회 */
-router.post('/mealSearch', uploadSignUp.single(), function(req, res){
+router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
     sleep(500);
 
     //날짜 가져오기
@@ -212,7 +214,7 @@ router.post('/mealSearch', uploadSignUp.single(), function(req, res){
 });
 
 /* POST : 식당 항목(Group) 조회 */
-router.post('/restaurantGroup', uploadSignUp.single(), function(req, res){
+router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
     sleep(500);
 
     var dataQuery = {};
@@ -280,7 +282,7 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
 
 
 /* POST : 회원 정보 조회 */
-router.post('/restaurantMember', uploadSignUp.single(), function(req, res){
+router.post('/restaurantMember', uploadsSignUp.single(), function(req, res){
     sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
@@ -302,10 +304,10 @@ router.post('/restaurantMember', uploadSignUp.single(), function(req, res){
 });
 
 /* POST : 식단 맛있어요 카운터  */
-router.post('/mealLikeCount', uploadSignUp.single(), function(req, res){
+router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
     sleep(500);
 
-    console.log(req.body)
+    //console.log(req.body)
 
     var cnt = 0;
     Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
@@ -339,7 +341,7 @@ router.post('/mealLikeCount', uploadSignUp.single(), function(req, res){
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
-router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), function(req, res){
+router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), function(req, res){
     sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
@@ -352,13 +354,21 @@ router.post('/restaurantSignUp', uploadSignUp.single('businessLicenseImage'), fu
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                var msg = "이미 존재하는 사용자ID 입니다."
-                httpMsgs.sendMessageFound(req, res, msg);
+                console.log(req.file.filename);
+                //파일 삭제                
+                if (req.file.filename != "") {
+                    //경로 주위 해야 함 
+                    //임시 파일이 생성 됨으로 직접 경로를 설정 
+                    fs.unlinkSync(uploadsSignUpDir + '/' + req.file.filename);
+                }
 
+                var msg = "이미 존재하는 사용자ID 입니다.";
+                httpMsgs.sendMessageFound(req, res, msg);
             } else {
                 // 식당 등록 : (sha256 : swift 가 Hex만 지원)
                 //var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
                 //console.log('hashed: ' , hash);
+
                 console.log('password: ' , req.body.password);
                 var restaurant = new Restaurant({
                     id                      : req.body.id,
@@ -500,7 +510,7 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 /********************************  수정  ***********************************/
 
 /* PUT : 회원 수정 */
-router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), function(req, res) {
+router.put('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), function(req, res) {
     sleep(500);
    
     //console.log(req.body)
@@ -531,7 +541,7 @@ router.put('/restaurantEdit', uploadSignUp.single('businessLicenseImage'), funct
             if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
                 if (data.businessLicenseImage != "") {
                     console.log('=> 파일 삭제');
-                    fs.unlinkSync(uploadSignUpDir + '/' + data.businessLicenseImage);
+                    fs.unlinkSync(uploadsSignUpDir + '/' + data.businessLicenseImage);
                     //fs.unlink(uploadDir + '/' + data.businessLicenseImage);
                 //} else {
                     //console.log('=>등록된 파일은 없음');
