@@ -588,8 +588,8 @@ router.put('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), func
 
 });
 
-/* PUT : 식단 수정 */
-router.put('/mealEdit', upload.single('foodImage'), function(req, res){
+/* POST : 식단 수정 */
+router.post('/mealEdit', upload.single('foodImage'), function(req, res){
     sleep(500);
     //console.log(req.body);
 
@@ -840,7 +840,7 @@ router.put('/mealLike', upload.single(), function(req, res){
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.delete('/mealDel', function(req, res){
     sleep(500);
-    console.log(req.query.meal_Id)
+    //console.log(req.query.meal_Id)
 
     Meal.findOne({_id : req.query.meal_Id}
         , function(err, data){

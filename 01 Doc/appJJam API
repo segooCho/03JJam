@@ -133,7 +133,7 @@ Endpoint: http://127.0.0.1:3000/
       =>notice          : 서버에서 처리 '공지사항'
 
 
-/* PUT : 식단 수정 */
+/* POST : 식단 수정 : Android 와 공용으로 put -> Post로 변경 */
 /mealEdit
     Req.body.Parameter
         01.meal_Id                   :   Text =>     _id(Meal Oid)
