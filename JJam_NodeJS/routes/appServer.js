@@ -509,8 +509,8 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 
 /********************************  수정  ***********************************/
 
-/* PUT : 회원 수정 */
-router.put('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), function(req, res) {
+/* POST : 회원 수정 */
+router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), function(req, res) {
     sleep(500);
    
     //console.log(req.body)

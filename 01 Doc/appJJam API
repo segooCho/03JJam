@@ -114,7 +114,7 @@ Endpoint: http://127.0.0.1:3000/
 
 /********************************  수정  ***********************************/
 
-/* PUT : 회원 수정 */
+/* POST : 회원 수정  : Android 와 공용으로 put -> Post로 변경 */
 /restaurantEdit
     Req.Body.Parameter
         01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
