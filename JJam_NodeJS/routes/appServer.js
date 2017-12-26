@@ -526,7 +526,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
             //암호를 우선 처리
             if (req.body.password != '') {
                 //암호 먼저 업데이트
-                query = {password            : req.body.password};
+                query = {password : req.body.password};
                 Restaurant.update({_id : req.body.restaurant_Id}
                     , { $set : query }
                     , function(err){
@@ -561,7 +561,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
                     , { $set : query }
                     , function(err){
                         //로그인 msg 멘트 변경시 iOS 수정 필요
-                        var msg = "회원 수정이 완료되었습니다."
+                        var msg = "회원 수정이 완료되었습니다.\n로그인 페이지로 이동합니다."
                         httpMsgs.sendMessageZeroFound(req, res, msg);
                 });
 
@@ -579,7 +579,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
                     , { $set : query }
                     , function(err){
                         //로그인 msg 멘트 변경시 iOS 수정 필요
-                        var msg = "회원 수정이 완료되었습니다."
+                        var msg = "회원 수정이 완료되었습니다.\n로그인 페이지로 이동합니다."
                         httpMsgs.sendMessageZeroFound(req, res, msg);
                 });
             }
