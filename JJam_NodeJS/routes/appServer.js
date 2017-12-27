@@ -222,7 +222,7 @@ router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
         dataQuery = {group:req.body.group}; 
     }
 
-    console.log(dataQuery)
+    //console.log(dataQuery)
 
     Group.find({$and:[{restaurant_Id:req.body.restaurant_Id},dataQuery]}
             ,{_id:0, restaurant_Id:1, group:1, text:1, androidRtn:1}
@@ -354,7 +354,7 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                console.log(req.file.filename);
+                //console.log(req.file.filename);
                 //파일 삭제                
                 if (req.file.filename != "") {
                     //경로 주위 해야 함 
@@ -369,7 +369,7 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
                 //var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
                 //console.log('hashed: ' , hash);
 
-                console.log('password: ' , req.body.password);
+                //console.log('password: ' , req.body.password);
                 var restaurant = new Restaurant({
                     id                      : req.body.id,
                     password                : req.body.password,
@@ -491,7 +491,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 router.post('/restaurantGroupAdd', upload.single(), function(req, res){
     sleep(500);
 
-    console.log(req.body)
+    //console.log(req.body)
 
     var group = new Group({
         restaurant_Id   : req.body.restaurant_Id,
@@ -499,6 +499,7 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
         text            : req.body.text,
         androidRtn      : '0',
     });
+
     group.save(function(err){
         //msg 멘트 변경시 iOS 수정 필요
         var msg = "저장이 완료되었습니다."
@@ -533,20 +534,20 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
                         if (err) {
                             httpMsgs.show500(req, res, err);
                         }                        
-                        console.log("암호 업데이트")
+                        //console.log("암호 업데이트")
                 });
             }
 
             
             if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
                 if (data.businessLicenseImage != "") {
-                    console.log('=> 파일 삭제');
+                    //console.log('=> 파일 삭제');
                     fs.unlinkSync(uploadsSignUpDir + '/' + data.businessLicenseImage);
                     //fs.unlink(uploadDir + '/' + data.businessLicenseImage);
                 //} else {
                     //console.log('=>등록된 파일은 없음');
                 }
-                console.log('=> 등록 요청 파일 있음');
+                //console.log('=> 등록 요청 파일 있음');
                 query = {
                     businessNumber          : req.body.businessNumber,
                     companyName             : req.body.companyName,
@@ -567,7 +568,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
 
 
             } else {
-                console.log('=> 등록 요청 파일 없음');
+                //console.log('=> 등록 요청 파일 없음');
                 query = {
                     businessNumber          : req.body.businessNumber,
                     companyName             : req.body.companyName,
@@ -623,13 +624,13 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
         } else {
             if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
                 if (data.foodImage != "") {
-                    console.log('=> 파일 삭제');
+                    //console.log('=> 파일 삭제');
                     fs.unlinkSync(uploadDir + '/' + data.foodImage);
                     //fs.unlink(uploadDir + '/' + data.foodImage);
                 //} else {
                     //console.log('=>등록된 파일은 없음');
                 }
-                console.log('=> 등록 요청 파일 있음');
+                //console.log('=> 등록 요청 파일 있음');
                 query = {
                     mealDate        : req.body.mealDate,
                     mealDateLabel   : week,
@@ -647,7 +648,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
                     foodImage       : (req.file) ? req.file.filename : ""
                 };
             } else {
-                console.log('=> 등록 요청 파일 없음');
+                //console.log('=> 등록 요청 파일 없음');
                 query = {
                     mealDate        : req.body.mealDate,
                     mealDateLabel   : week,
@@ -718,7 +719,7 @@ router.put('/mealLike', upload.single(), function(req, res){
             });
 
             like.save(function(err){
-                console.log("save")
+                //console.log("save")
                 //msg 멘트 변경시 iOS 수정 필요
                 var msg = "맛있어요 설정되었습니다."
                 httpMsgs.sendMessageZeroFound(req, res, msg);
@@ -727,7 +728,7 @@ router.put('/mealLike', upload.single(), function(req, res){
             Like.remove({$and:[{meal_Id : req.body.meal_Id}
                               ,{uniqueId: req.body.uniqueId}]}
                 , function(err){
-                console.log("remove")
+                //console.log("remove")
                     //msg 멘트 변경시 iOS 수정 필요
                     var msg = "맛있어요 해제되었습니다."
                     httpMsgs.sendMessageZeroFound(req, res, msg);
