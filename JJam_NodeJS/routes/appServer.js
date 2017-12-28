@@ -305,9 +305,9 @@ router.post('/restaurantMember', uploadsSignUp.single(), function(req, res){
 
 /* POST : 식단 맛있어요 카운터  */
 router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
-    //console.log(req.body)
+    console.log(req.body.meal_Id)
 
     var cnt = 0;
     Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
@@ -315,8 +315,12 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
             httpMsgs.show500(req, res, err);
         } else {
             cnt = data;
+            console.log(cnt)
         }        
     });
+
+    //카운터 조회 시간이 필요 함???
+    sleep(10);
 
     Like.count({$and:[{meal_Id : req.body.meal_Id}
                     ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
