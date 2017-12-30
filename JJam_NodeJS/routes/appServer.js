@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 
 // model
-var Restaurant = require('../models/Restaurant');   //식당 회원 정보
-var Group = require('../models/Group');             //식당의 메뉴 관리*(category : 모델 생성이 안됨)
-var Meal = require('../models/Meal');               //식단 정보
-var Like = require('../models/Like');               //좋아요 정보
+var ManagerNotice = require('../models/ManagerNotice');     //관리자 공지사항
+var Restaurant = require('../models/Restaurant');           //식당 회원 정보
+var Group = require('../models/Group');                     //식당의 메뉴 관리*(category : 모델 생성이 안됨)
+var Meal = require('../models/Meal');                       //식단 정보
+var Like = require('../models/Like');                       //맛있어요 정보
+
 
 // hash
 var crypto = require('crypto');
@@ -48,9 +50,46 @@ var upload = multer({ storage: storage });
 
 /********************************  찾기  ***********************************/
 
+/* POST : 관리자 공지사항 찾기 */
+router.post('/managerNoticeSearch', uploadsSignUp.single(), function(req, res){
+
+    //console.log(req.body.division);
+    //console.log(req.body.text);
+
+    /*
+    var managerNotice = new ManagerNotice({
+        division        : req.body.division,
+        text            : req.body.text,
+        androidRtn      : '0',
+    });
+
+    managerNotice.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+    */
+
+    ManagerNotice.find({division:req.body.division}
+            ,{_id:0, text:1, androidRtn:1}
+            , function(err, data){
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                var msg = "공지사항 없음."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
+    });
+});
+
+
 /* POST : 식당 찾기 */
 router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
     //console.log(req.body.searchText);
     //var testJson;
 
@@ -72,7 +111,7 @@ router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
 
 /* POST : 식당 인증 & 공지사항 */
 router.post('/restaurantInfo', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
             ,{_id:0, certification:1, notice:1, androidRtn:1}
@@ -92,7 +131,7 @@ router.post('/restaurantInfo', uploadsSignUp.single(), function(req, res){
 
 /* POST : 식단 조회 */
 router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //날짜 가져오기
     var date = new Date();
@@ -215,7 +254,7 @@ router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
 
 /* POST : 식당 항목(Group) 조회 */
 router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     var dataQuery = {};
     if (req.body.group != '') {
@@ -245,7 +284,7 @@ router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
 /* POST : 로그인 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantLogin', upload.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //사용자 ID 검사
     Restaurant.find({id:req.body.id}
@@ -283,7 +322,7 @@ router.post('/restaurantLogin', upload.single(), function(req, res){
 
 /* POST : 회원 정보 조회 */
 router.post('/restaurantMember', uploadsSignUp.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
             ,{}
@@ -346,7 +385,7 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
 
 /* POST : 회원 가입 */
 router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
     //console.log('req.body.id' , req.body.id); 
@@ -439,7 +478,7 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
 
 /* POST : 식단 등록 */
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
-    sleep(500);
+    //sleep(500);
     
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
@@ -493,7 +532,7 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
 /* POST : 식당 항목(Group) 추가  */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.post('/restaurantGroupAdd', upload.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //console.log(req.body)
 
@@ -516,7 +555,7 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 
 /* POST : 회원 수정 */
 router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), function(req, res) {
-    sleep(500);
+    //sleep(500);
    
     //console.log(req.body)
 
@@ -595,7 +634,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
 
 /* POST : 식단 수정 */
 router.post('/mealEdit', upload.single('foodImage'), function(req, res){
-    sleep(500);
+    //sleep(500);
     //console.log(req.body);
 
     //요일 찾기
@@ -684,7 +723,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
 /* PUT : 식당 공지사항 수정 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //console.log(req.body.restaurant_Id)
     //console.log(req.body.notice)
@@ -706,7 +745,7 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
 /* PUT : 식단 맛있어요 설정/해제 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.put('/mealLike', upload.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //console.log(req.body.meal_Id)
     
@@ -844,7 +883,7 @@ router.put('/mealLike', upload.single(), function(req, res){
 /* DELETE : 식단 삭제 */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.delete('/mealDel', function(req, res){
-    sleep(500);
+    //sleep(500);
     //console.log(req.query.meal_Id)
 
     Meal.findOne({_id : req.query.meal_Id}
@@ -875,7 +914,7 @@ router.delete('/mealDel', function(req, res){
 /* DELETE : 식당 항목 (Group) 삭제  */
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.delete('/restaurantGroupDel', upload.single(), function(req, res){
-    sleep(500);
+    //sleep(500);
 
     //console.log(req.body)
 

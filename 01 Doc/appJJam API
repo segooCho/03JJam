@@ -4,6 +4,11 @@ Endpoint: http://127.0.0.1:3000/
 
 /********************************  찾기  ***********************************/
 
+/* POST : 관리자 공지사항 찾기 */
+/managerNoticeSearch
+    Req.Body.Parameter
+        01.division                   :   Text =>     division : 일반 : 0 , 사업자 : 1
+
 
 /* POST : 식당 찾기 */
 /restaurantSearch
