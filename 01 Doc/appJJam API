@@ -62,6 +62,14 @@ Endpoint: http://127.0.0.1:3000/
         01.meal_Id                   :   Text =>     _id(Meal Oid)
         02.uniqueId                  :   Text =>     휴대전화 고유UUid
 
+
+/* POST :  문의 또는 식당요청 게시판 조회*/
+/boardSearch
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(restaurant_Id)
+        02.uniqueId                  :   Text =>     휴대전화 고유UUid
+
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -115,6 +123,16 @@ Endpoint: http://127.0.0.1:3000/
                                                      -sideDish     : 반찬
                                                      -dessert      : 없음(필수) 후식
                                                      *클라이언트에서 중복을 Check해서 전송한다.
+
+/* POST :  문의 또는 식당요청 게시판 */
+/boardWrite
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.uniqueId                  :   Text =>     휴대전화 고유UUid
+        03.division                  :   Text =>     식당 요청 : 0, 문의 : 1
+        04.title                     :   Text =>     제목
+        05.contents                  :   Text =>     문의 / 식당 요청 내용
+
 
 
 /********************************  수정  ***********************************/
@@ -175,6 +193,23 @@ Endpoint: http://127.0.0.1:3000/
         02.uniqueId                  :   Text =>     휴대전화 고유UUid
 
 
+
+/* POST :  문의 또는 식당요청 게시판 수정 */
+/boardEdit
+    Req.body.Parameter
+        01.Board_id                  :   Text =>     _id(Board Oid)
+        02.title                     :   Text =>     제목
+        03.contents                  :   Text =>     문의
+
+
+
+/* POST :  문의 또는 식당요청 게시판 관리자 답변 */
+/boardAnswer
+    Req.body.Parameter
+        01.Board_id                  :   Text =>     _id(Board Oid)
+        02.answer                    :   Text =>     답변
+
+
 /********************************  삭제  ***********************************/
 
 /* DELETE : 식단 삭제 */
@@ -196,5 +231,11 @@ DELETE /mealDel
                                                      -sideDish     : 반찬
                                                      -dessert      : 없음(필수) 후식
                                                      *각 항목에 기본적으로 1가지는 있도록 클라이언트에서 Check한다.
+
+
+/* DELETE :  문의 또는 식당요청 게시판 삭제 */
+/boardDel
+    Req.query.Parameter
+        01.Board_id                  :   Text =>     _id(Board Oid)
 
 

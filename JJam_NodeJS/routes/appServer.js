@@ -7,6 +7,7 @@ var Restaurant = require('../models/Restaurant');           //식당 회원 정�
 var Group = require('../models/Group');                     //식당의 메뉴 관리*(category : 모델 생성이 안됨)
 var Meal = require('../models/Meal');                       //식단 정보
 var Like = require('../models/Like');                       //맛있어요 정보
+var Board = require('../models/Board');                     //문의 & 식당 요청 게시판
 
 
 // hash
@@ -47,6 +48,9 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({ storage: storage });
+
+
+// upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 
 /********************************  찾기  ***********************************/
 
@@ -346,7 +350,7 @@ router.post('/restaurantMember', uploadsSignUp.single(), function(req, res){
 router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
     //sleep(500);
 
-    console.log(req.body.meal_Id)
+    //console.log(req.body.meal_Id)
 
     var cnt = 0;
     Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
@@ -354,7 +358,7 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
             httpMsgs.show500(req, res, err);
         } else {
             cnt = data;
-            console.log(cnt)
+            //console.log(cnt)
         }        
     });
 
@@ -379,8 +383,32 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
     
     //기본 세팅
     //httpMsgs.sendLikeCountFound(req, res, "n", cnt);
-
 });
+
+
+/* POST :  문의 또는 식당요청 게시판 조회*/
+router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
+    //sleep(500);
+
+    //console.log(req.body.restaurant_Id)
+    //console.log(req.body.uniqueId)
+
+    Board.find({$and:[{restaurant_Id : req.body.restaurant_Id}
+                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                httpMsgs.sendJson(req, res, data);      
+            } else {
+                var msg = "정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+                //httpMsgs.sendNoDataFound(req, res);
+            }
+        }        
+    });
+});
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -544,6 +572,29 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
     });
 
     group.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+});
+
+
+/* POST :  문의 또는 식당요청 게시판 */
+router.post('/boardWrite', upload.single(), function(req, res){
+    //sleep(500);
+    //console.log(req.body)
+
+    var board = new Board({
+        restaurant_Id   : req.body.restaurant_Id,
+        uniqueId        : req.body.uniqueId,
+        division        : req.body.division,
+        title           : req.body.title,
+        contents        : req.body.contents,
+        answer          : '',
+        androidRtn      : '0',
+    });
+
+    board.save(function(err){
         //msg 멘트 변경시 iOS 수정 필요
         var msg = "저장이 완료되었습니다."
         httpMsgs.sendMessageZeroFound(req, res, msg);
@@ -878,6 +929,48 @@ router.put('/mealLike', upload.single(), function(req, res){
     */
 
 });
+
+
+/* POST :  문의 또는 식당요청 게시판 수정 */
+router.put('/boardEdit', upload.single(), function(req, res){
+    //sleep(500);
+
+    console.log(req.body.contents)
+
+    var query = {
+        title           : req.body.title,
+        contents        : req.body.contents
+    };
+
+    Board.update({_id : req.body.Board_id}, 
+                { $set : query },
+    function(err){
+        //httpMsgs.sendNoDataFound(req, res);
+        var msg = "수정이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+
+});
+
+/* POST :  문의 또는 식당요청 게시판 관리자 답변 */
+router.put('/boardAnswer', upload.single(), function(req, res){
+    //sleep(500);
+
+    var query = {
+        answer        : req.body.answer
+    };
+
+    Board.update({_id : req.body.Board_id}, 
+                { $set : query },
+    function(err){
+        //httpMsgs.sendNoDataFound(req, res);
+        var msg = "답변이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+
+});
+
+
 /********************************  삭제  ***********************************/
 
 /* DELETE : 식단 삭제 */
@@ -927,4 +1020,18 @@ router.delete('/restaurantGroupDel', upload.single(), function(req, res){
             httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 });
+
+/* DELETE :  문의 또는 식당요청 게시판 삭제 */
+router.delete('/boardDel', upload.single(), function(req, res){
+    //sleep(500);
+
+    Board.remove({_id : req.query.Board_id}
+        , function(err){
+            //msg 멘트 변경시 iOS 수정 필요
+            var msg = "삭제가 완료되었습니다."
+            httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+});
+
+
 module.exports = router;
