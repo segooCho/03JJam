@@ -197,7 +197,7 @@ Endpoint: http://127.0.0.1:3000/
 /* POST :  문의 또는 식당요청 게시판 수정 */
 /boardEdit
     Req.body.Parameter
-        01.Board_id                  :   Text =>     _id(Board Oid)
+        01.Board_Id                  :   Text =>     _id(Board Oid)
         02.title                     :   Text =>     제목
         03.contents                  :   Text =>     문의
 
@@ -206,7 +206,7 @@ Endpoint: http://127.0.0.1:3000/
 /* POST :  문의 또는 식당요청 게시판 관리자 답변 */
 /boardAnswer
     Req.body.Parameter
-        01.Board_id                  :   Text =>     _id(Board Oid)
+        01.Board_Id                  :   Text =>     _id(Board Oid)
         02.answer                    :   Text =>     답변
 
 
@@ -236,6 +236,6 @@ DELETE /mealDel
 /* DELETE :  문의 또는 식당요청 게시판 삭제 */
 /boardDel
     Req.query.Parameter
-        01.Board_id                  :   Text =>     _id(Board Oid)
+        01.Board_Id                  :   Text =>     _id(Board Oid)
 
 

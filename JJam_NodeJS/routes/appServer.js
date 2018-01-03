@@ -390,8 +390,8 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
 router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
     //sleep(500);
 
-    //console.log(req.body.restaurant_Id)
-    //console.log(req.body.uniqueId)
+    console.log(req.body.restaurant_Id)
+    console.log(req.body.uniqueId)
 
     Board.find({$and:[{restaurant_Id : req.body.restaurant_Id}
                     ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
@@ -935,14 +935,14 @@ router.put('/mealLike', upload.single(), function(req, res){
 router.put('/boardEdit', upload.single(), function(req, res){
     //sleep(500);
 
-    console.log(req.body.contents)
+    //console.log(req.body.contents)
 
     var query = {
         title           : req.body.title,
         contents        : req.body.contents
     };
 
-    Board.update({_id : req.body.Board_id}, 
+    Board.update({_id : req.body.Board_Id}, 
                 { $set : query },
     function(err){
         //httpMsgs.sendNoDataFound(req, res);
@@ -960,7 +960,7 @@ router.put('/boardAnswer', upload.single(), function(req, res){
         answer        : req.body.answer
     };
 
-    Board.update({_id : req.body.Board_id}, 
+    Board.update({_id : req.body.Board_Id}, 
                 { $set : query },
     function(err){
         //httpMsgs.sendNoDataFound(req, res);
@@ -1025,7 +1025,7 @@ router.delete('/restaurantGroupDel', upload.single(), function(req, res){
 router.delete('/boardDel', upload.single(), function(req, res){
     //sleep(500);
 
-    Board.remove({_id : req.query.Board_id}
+    Board.remove({_id : req.query.Board_Id}
         , function(err){
             //msg 멘트 변경시 iOS 수정 필요
             var msg = "삭제가 완료되었습니다."
