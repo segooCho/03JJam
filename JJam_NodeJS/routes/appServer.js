@@ -60,20 +60,6 @@ router.post('/managerNoticeSearch', uploadsSignUp.single(), function(req, res){
     //console.log(req.body.division);
     //console.log(req.body.text);
 
-    /*
-    var managerNotice = new ManagerNotice({
-        division        : req.body.division,
-        text            : req.body.text,
-        androidRtn      : '0',
-    });
-
-    managerNotice.save(function(err){
-        //msg 멘트 변경시 iOS 수정 필요
-        var msg = "저장이 완료되었습니다."
-        httpMsgs.sendMessageZeroFound(req, res, msg);
-    });
-    */
-
     ManagerNotice.find({division:req.body.division}
             ,{_id:0, text:1, androidRtn:1}
             , function(err, data){
@@ -390,8 +376,8 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
 router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
     //sleep(500);
 
-    console.log(req.body.restaurant_Id)
-    console.log(req.body.uniqueId)
+    //console.log(req.body.restaurant_Id)
+    //console.log(req.body.uniqueId)
 
     Board.find({$and:[{restaurant_Id : req.body.restaurant_Id}
                     ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
@@ -582,7 +568,8 @@ router.post('/restaurantGroupAdd', upload.single(), function(req, res){
 /* POST :  문의 또는 식당요청 게시판 */
 router.post('/boardWrite', upload.single(), function(req, res){
     //sleep(500);
-    //console.log(req.body)
+
+    //console.log(req.body.Board_Id_Id)
 
     var board = new Board({
         restaurant_Id   : req.body.restaurant_Id,
@@ -935,7 +922,7 @@ router.put('/mealLike', upload.single(), function(req, res){
 router.put('/boardEdit', upload.single(), function(req, res){
     //sleep(500);
 
-    //console.log(req.body.contents)
+    //console.log(req.body.Board_Id)
 
     var query = {
         title           : req.body.title,
@@ -965,6 +952,26 @@ router.put('/boardAnswer', upload.single(), function(req, res){
     function(err){
         //httpMsgs.sendNoDataFound(req, res);
         var msg = "답변이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+
+});
+
+
+
+/* POST : 관리자 공지사항 등록 */
+router.post('/managerNoticeInit', upload.single(), function(req, res){
+    //sleep(500);
+
+    var managerNotice = new ManagerNotice({
+        division        : req.body.division,
+        text            : req.body.text,
+        androidRtn      : '0',
+    });
+
+    managerNotice.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
         httpMsgs.sendMessageZeroFound(req, res, msg);
     });
 

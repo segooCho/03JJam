@@ -134,6 +134,15 @@ Endpoint: http://127.0.0.1:3000/
         05.contents                  :   Text =>     문의 / 식당 요청 내용
 
 
+/* POST :  문의 또는 식당요청 게시판 */
+/boardWrite
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(Restaurant Oid)
+        02.uniqueId                  :   Text =>     휴대전화 고유UUid
+        03.division                  :   Text =>     식당 요청 : 0, 문의 : 1
+        04.title                     :   Text =>     제목
+        05.contents                  :   Text =>     문의 / 식당 요청 내용
+
 
 /********************************  수정  ***********************************/
 
@@ -202,12 +211,19 @@ Endpoint: http://127.0.0.1:3000/
         03.contents                  :   Text =>     문의
 
 
-
-/* POST :  문의 또는 식당요청 게시판 관리자 답변 */
+/* POST :  문의 또는 식당요청 게시판 답변 */
 /boardAnswer
     Req.body.Parameter
         01.Board_Id                  :   Text =>     _id(Board Oid)
         02.answer                    :   Text =>     답변
+
+
+
+/* POST : 관리자 공지사항 등록 : 이걸로 DB를 먼저 만들어야 연결이 가능하다 Robomomgo에서 생성하면 nodejs 서버에서 연결이 안됨*/
+/managerNoticeInit
+    Req.body.Parameter
+        01.division                  :   Text =>     0:일반 사용자 관리자 공지 , 1: 사업자 사용자 관리자 공지
+        02.text                      :   Text =>     공지 사항
 
 
 /********************************  삭제  ***********************************/
