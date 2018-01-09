@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var LikeSchema = new Schema({
+    restaurant_Id         : String,
     meal_Id         : String,
     uniqueId        : String,
     androidRtn      : String,

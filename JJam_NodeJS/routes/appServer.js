@@ -57,7 +57,7 @@ var upload = multer({ storage: storage });
 /* POST : 관리자 공지사항 찾기 */
 router.post('/managerNoticeSearch', uploadsSignUp.single(), function(req, res){
 
-    //console.log(req.body.division);
+    //console.log(req.body);
     //console.log(req.body.text);
 
     ManagerNotice.find({division:req.body.division}
@@ -174,71 +174,6 @@ router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
     })
     .sort({"mealDate":1,"location":1,"sort":1,"division":1})    //-1:내림 차순, 1:오늘 차순
     .limit(30);                                                  //제한 30
-
-    /*  lookupQuery 방식 
-    var lookupQuery = {
-        $lookup: {  from: "likes"
-                    ,localField: "_id"          //ObjectId 타입이 같아야 됨
-                    ,foreignField: "meal_Id"    //meal_Id 스키마를 String => Schema.Types.ObjectId 
-                    ,as: "likeDocs" 
-                 }
-    };
-   
-    Meal.aggregate([
-                    lookupQuery
-                    ,{ $match: 
-                        {$and:[
-                            {restaurant_Id: req.body.restaurant_Id}, dataQuery1, dataQuery2
-                              ]
-                         }
-                     }
-                    ,{
-                      $project: {
-                         restaurant_Id   : 1,
-                         mealDate        : 1,
-                         mealDateLabel   : 1,
-                         location        : 1,
-                         division        : 1,
-                         sort            : 1,
-                         stapleFood      : 1,
-                         soup            : 1,
-                         sideDish1       : 1,
-                         sideDish2       : 1,
-                         sideDish3       : 1,
-                         sideDish4       : 1,
-                         dessert         : 1,
-                         remarks         : 1,
-                         foodImage       : 1,
-                         like            : 1,
-                         androidRtn      : 1,
-                         likeDocs: {
-                            $filter: {
-                               input: "$likeDocs",
-                               as: "likeDoc",
-                               cond: { $eq : ["$$likeDoc.uniqueId", "123"]}
-                            }
-                         }
-                      }
-                    }
-                    ,{$sort : {"mealDate":1,"location":1,"sort":1,"division":1}}    //-1:내림 차순, 1:오늘 차순
-                    ,{ $limit : 30 }                                                //제한 30
-                   ]
-            , function(err, data){
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            console.log(data)
-
-            if (data.length>0) {
-                httpMsgs.sendJson(req, res, data);      
-            } else {
-                var msg = msgSegmented + " 식단 정보가 없습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-                //httpMsgs.sendNoDataFound(req, res);
-            }
-        }     
-    });
-    */
 
 });
 
@@ -494,6 +429,8 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
 router.post('/mealWrite', upload.single('foodImage'), function(req, res){
     //sleep(500);
     
+    //console.log(req.body);
+
     //요일 찾기
     var weekName = new Array('일','월','화','수','목','금','토'); 
     var year = req.body.mealDate.substring(0,4);
@@ -523,15 +460,27 @@ router.post('/mealWrite', upload.single('foodImage'), function(req, res){
         location        : req.body.location,
         division        : req.body.division,
         sort            : sort,
-        stapleFood      : req.body.stapleFood,
-        soup            : req.body.soup,
-        sideDish1       : req.body.sideDish1,
-        sideDish2       : req.body.sideDish2,
-        sideDish3       : req.body.sideDish3,
-        sideDish4       : req.body.sideDish4,
-        dessert         : req.body.dessert,
+        stapleFood1     : (req.body.stapleFood1) ? req.body.stapleFood1 : "",
+        stapleFood2     : (req.body.stapleFood2) ? req.body.stapleFood2 : "",   //미사용 2018.1.9
+        stapleFood3     : (req.body.stapleFood3) ? req.body.stapleFood3 : "",   //미사용 2018.1.9
+        soup1           : (req.body.soup1) ? req.body.soup1 : "",
+        soup2           : (req.body.soup2) ? req.body.soup2 : "",               //미사용 2018.1.9
+        soup3           : (req.body.soup3) ? req.body.soup3 : "",               //미사용 2018.1.9
+        sideDish1       : (req.body.sideDish1) ? req.body.sideDish1 : "",
+        sideDish2       : (req.body.sideDish2) ? req.body.sideDish2 : "",
+        sideDish3       : (req.body.sideDish3) ? req.body.sideDish3 : "",
+        sideDish4       : (req.body.sideDish4) ? req.body.sideDish4 : "",
+        sideDish5       : (req.body.sideDish5) ? req.body.sideDish5 : "",
+        sideDish6       : (req.body.sideDish6) ? req.body.sideDish6 : "",
+        sideDish7       : (req.body.sideDish7) ? req.body.sideDish7 : "",
+        sideDish8       : (req.body.sideDish8) ? req.body.sideDish8 : "",       //미사용 2018.1.9
+        sideDish9       : (req.body.sideDish9) ? req.body.sideDish9 : "",       //미사용 2018.1.9
+        dessert1        : (req.body.dessert1) ? req.body.dessert1 : "",
+        dessert2        : (req.body.dessert2) ? req.body.dessert2 : "",
+        dessert3        : (req.body.dessert3) ? req.body.dessert3 : "",
+        dessert4        : (req.body.dessert4) ? req.body.dessert4 : "",         //미사용 2018.1.9
+        dessert5        : (req.body.dessert5) ? req.body.dessert5 : "",         //미사용 2018.1.9
         remarks         : req.body.remarks,
-        like            : 0,
         foodImage       : (req.file) ? req.file.filename : "",
         androidRtn      : "0"
     });
@@ -718,13 +667,26 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
                     location        : req.body.location,
                     division        : req.body.division,
                     sort            : sort,
-                    stapleFood      : req.body.stapleFood,
-                    soup            : req.body.soup,
-                    sideDish1       : req.body.sideDish1,
-                    sideDish2       : req.body.sideDish2,
-                    sideDish3       : req.body.sideDish3,
-                    sideDish4       : req.body.sideDish4,
-                    dessert         : req.body.dessert,
+                    stapleFood1     : (req.body.stapleFood1) ? req.body.stapleFood1 : "",
+                    stapleFood2     : (req.body.stapleFood2) ? req.body.stapleFood2 : "",   //미사용 2018.1.9
+                    stapleFood3     : (req.body.stapleFood3) ? req.body.stapleFood3 : "",   //미사용 2018.1.9
+                    soup1           : (req.body.soup1) ? req.body.soup1 : "",
+                    soup2           : (req.body.soup2) ? req.body.soup2 : "",               //미사용 2018.1.9
+                    soup3           : (req.body.soup3) ? req.body.soup3 : "",               //미사용 2018.1.9
+                    sideDish1       : (req.body.sideDish1) ? req.body.sideDish1 : "",
+                    sideDish2       : (req.body.sideDish2) ? req.body.sideDish2 : "",
+                    sideDish3       : (req.body.sideDish3) ? req.body.sideDish3 : "",
+                    sideDish4       : (req.body.sideDish4) ? req.body.sideDish4 : "",
+                    sideDish5       : (req.body.sideDish5) ? req.body.sideDish5 : "",
+                    sideDish6       : (req.body.sideDish6) ? req.body.sideDish6 : "",
+                    sideDish7       : (req.body.sideDish7) ? req.body.sideDish7 : "",
+                    sideDish8       : (req.body.sideDish8) ? req.body.sideDish8 : "",       //미사용 2018.1.9
+                    sideDish9       : (req.body.sideDish9) ? req.body.sideDish9 : "",       //미사용 2018.1.9
+                    dessert1        : (req.body.dessert1) ? req.body.dessert1 : "",
+                    dessert2        : (req.body.dessert2) ? req.body.dessert2 : "",
+                    dessert3        : (req.body.dessert3) ? req.body.dessert3 : "",
+                    dessert4        : (req.body.dessert4) ? req.body.dessert4 : "",         //미사용 2018.1.9
+                    dessert5        : (req.body.dessert5) ? req.body.dessert5 : "",         //미사용 2018.1.9
                     remarks         : req.body.remarks,
                     foodImage       : (req.file) ? req.file.filename : ""
                 };
@@ -736,13 +698,26 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
                     location        : req.body.location,
                     division        : req.body.division,
                     sort            : sort,
-                    stapleFood      : req.body.stapleFood,
-                    soup            : req.body.soup,
-                    sideDish1       : req.body.sideDish1,
-                    sideDish2       : req.body.sideDish2,
-                    sideDish3       : req.body.sideDish3,
-                    sideDish4       : req.body.sideDish4,
-                    dessert         : req.body.dessert,
+                    stapleFood1     : (req.body.stapleFood1) ? req.body.stapleFood1 : "",
+                    stapleFood2     : (req.body.stapleFood2) ? req.body.stapleFood2 : "",   //미사용 2018.1.9
+                    stapleFood3     : (req.body.stapleFood3) ? req.body.stapleFood3 : "",   //미사용 2018.1.9
+                    soup1           : (req.body.soup1) ? req.body.soup1 : "",
+                    soup2           : (req.body.soup2) ? req.body.soup2 : "",               //미사용 2018.1.9
+                    soup3           : (req.body.soup3) ? req.body.soup3 : "",               //미사용 2018.1.9
+                    sideDish1       : (req.body.sideDish1) ? req.body.sideDish1 : "",
+                    sideDish2       : (req.body.sideDish2) ? req.body.sideDish2 : "",
+                    sideDish3       : (req.body.sideDish3) ? req.body.sideDish3 : "",
+                    sideDish4       : (req.body.sideDish4) ? req.body.sideDish4 : "",
+                    sideDish5       : (req.body.sideDish5) ? req.body.sideDish5 : "",
+                    sideDish6       : (req.body.sideDish6) ? req.body.sideDish6 : "",
+                    sideDish7       : (req.body.sideDish7) ? req.body.sideDish7 : "",
+                    sideDish8       : (req.body.sideDish8) ? req.body.sideDish8 : "",       //미사용 2018.1.9
+                    sideDish9       : (req.body.sideDish9) ? req.body.sideDish9 : "",       //미사용 2018.1.9
+                    dessert1        : (req.body.dessert1) ? req.body.dessert1 : "",
+                    dessert2        : (req.body.dessert2) ? req.body.dessert2 : "",
+                    dessert3        : (req.body.dessert3) ? req.body.dessert3 : "",
+                    dessert4        : (req.body.dessert4) ? req.body.dessert4 : "",         //미사용 2018.1.9
+                    dessert5        : (req.body.dessert5) ? req.body.dessert5 : "",         //미사용 2018.1.9
                     remarks         : req.body.remarks
                 };
             }
@@ -787,133 +762,46 @@ router.put('/mealLike', upload.single(), function(req, res){
 
     //console.log(req.body.meal_Id)
     
-    Like.findOne({$and:[{meal_Id : req.body.meal_Id}
-                ,{uniqueId: req.body.uniqueId}]}
-                ,function(err, data){
-        //like    
-        if (data == null) {
-            // 신규 등록
-            var like = new Like({
-                meal_Id         : req.body.meal_Id,
-                uniqueId        : req.body.uniqueId,
-                androidRtn      : '0',
-            });
+    Meal.findOne({_id : req.body.meal_Id}
+    , function(err, data){
 
-            like.save(function(err){
-                //console.log("save")
-                //msg 멘트 변경시 iOS 수정 필요
-                var msg = "맛있어요 설정되었습니다."
-                httpMsgs.sendMessageZeroFound(req, res, msg);
-            });
+        if (data == null) {
+            var msg = "존재하지 않는 Oid 입니다."
+            httpMsgs.sendMessageFound(req, res, msg);
         } else {
-            Like.remove({$and:[{meal_Id : req.body.meal_Id}
-                              ,{uniqueId: req.body.uniqueId}]}
-                , function(err){
-                //console.log("remove")
-                    //msg 멘트 변경시 iOS 수정 필요
-                    var msg = "맛있어요 해제되었습니다."
-                    httpMsgs.sendMessageZeroFound(req, res, msg);
-            });
+            Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                        ,{uniqueId: req.body.uniqueId}]}
+                        ,function(err, data){
+                //like    
+                if (data == null) {
+                    // 신규 등록
+                    var like = new Like({
+                        restaurant_Id   : req.body.restaurant_Id,
+                        meal_Id         : req.body.meal_Id,
+                        uniqueId        : req.body.uniqueId,
+                        androidRtn      : '0',
+                    });
+
+                    like.save(function(err){
+                        //console.log("save")
+                        //msg 멘트 변경시 iOS 수정 필요
+                        var msg = "맛있어요 설정되었습니다."
+                        httpMsgs.sendMessageZeroFound(req, res, msg);
+                    });
+                } else {
+                    Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                                      ,{uniqueId: req.body.uniqueId}]}
+                        , function(err){
+                        //console.log("remove")
+                            //msg 멘트 변경시 iOS 수정 필요
+                            var msg = "맛있어요 해제되었습니다."
+                            httpMsgs.sendMessageZeroFound(req, res, msg);
+                    });
+                }
+            });            
         }
     });
 
-    /*
-    sleep(500);
-
-    var cnt = 0;
-    Like.count({meal_Id: req.body.meal_Id}, function (err, data) {
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            cnt = data;
-        }        
-    });
-
-    Like.count({$and:[{meal_Id : req.body.meal_Id}
-                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
-        if (err) {
-            httpMsgs.show500(req, res, err);
-        } else {
-            //console.log(data);
-            if (data > 0) {
-                //console.log("y");
-                httpMsgs.sendLikeCountFound(req, res, "y", cnt);
-            } else {
-                //console.log("n");
-                httpMsgs.sendLikeCountFound(req, res, "n", cnt);
-            }
-        }        
-    });
-    */
-
-    /*
-    if (req.body.like == 'y') {
-        Like.findOne({$and:[{meal_Id : req.body.meal_Id}
-                    ,{uniqueId: req.body.uniqueId}]}
-                    ,function(err, data){
-            //like    
-            if (data == null) {
-                // 신규 등록
-                var like = new Like({
-                    meal_Id         : req.body.meal_Id,
-                    uniqueId        : req.body.uniqueId,
-                    androidRtn      : '0',
-                });
-
-                like.save(function(err){
-                    //msg 멘트 변경시 iOS 수정 필요
-                    var msg = "맛있어요 설정되었습니다."
-                    httpMsgs.sendMessageFound(req, res, msg);
-                });
-            } else {
-                var msg = "맛있어요 설정되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            }
-        });
-    } else {
-            Like.remove({$and:[{meal_Id : req.body.meal_Id}
-                              ,{uniqueId: req.body.uniqueId}]}
-                , function(err){
-                    //msg 멘트 변경시 iOS 수정 필요
-                    var msg = "맛있어요 해제되었습니다."
-                    httpMsgs.sendMessageFound(req, res, msg);
-            });
-    }
-    */
-
-    /*
-    Like.findOne({$and:[{meal_Id : req.body.meal_Id}
-                ,{uniqueId: req.body.uniqueId}]}
-                ,function(err, data){
-        //like    
-        if (data == null) {
-            // 신규 등록
-            var like = new Like({
-                meal_Id         : req.body.meal_Id,
-                uniqueId        : req.body.uniqueId,
-                androidRtn      : '0',
-            });
-
-            like.save(function(err){
-                //msg 멘트 변경시 iOS 수정 필요
-                var msg = "맛있어요 설정되었습니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            });
-
-        } else {
-        //UnLike           
-            Like.remove({$and:[{meal_Id : req.body.meal_Id}
-                              ,{uniqueId: req.body.uniqueId}]}
-                , function(err){
-                    //msg 멘트 변경시 iOS 수정 필요
-                    var msg = "맛있어요 해제되었습니다."
-                    httpMsgs.sendMessageFound(req, res, msg);
-            });
-
-        }
-
-    });
-    */
 
 });
 
@@ -1001,6 +889,9 @@ router.delete('/mealDel', function(req, res){
                         }
                         Meal.remove({_id : req.query.meal_Id}
                             , function(err){
+                                Like.remove({meal_Id : req.query.meal_Id}
+                                    , function(err){
+                                });
                                 //로그인 msg 멘트 변경시 iOS 수정 필요
                                 var msg = "식단 삭제가 완료되었습니다."
                                 httpMsgs.sendMessageZeroFound(req, res, msg);
