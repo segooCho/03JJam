@@ -61,7 +61,7 @@ router.post('/managerNoticeSearch', uploadsSignUp.single(), function(req, res){
     //console.log(req.body.text);
 
     ManagerNotice.find({division:req.body.division}
-            ,{_id:0, text:1, androidRtn:1}
+            , {_id:0, text:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -83,8 +83,9 @@ router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
     //console.log(req.body.searchText);
     //var testJson;
 
-    Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}},{address:{$regex:req.body.searchText}}]}
-            ,{_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1, androidRtn:1}
+    Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}}
+            , {address:{$regex:req.body.searchText}}]}
+            , {_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -102,9 +103,8 @@ router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
 /* POST : 식당 인증 & 공지사항 */
 router.post('/restaurantInfo', uploadsSignUp.single(), function(req, res){
     //sleep(500);
-
     Restaurant.find({_id:req.body.restaurant_Id}
-            ,{_id:0, certification:1, notice:1, androidRtn:1}
+            , {_id:0, certification:1, notice:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -157,8 +157,8 @@ router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
     //console.log(dataQuery1);
 
     Meal.find({$and:[{restaurant_Id:req.body.restaurant_Id}, dataQuery1, dataQuery2]}
-            ,{}
-            ,{}
+            , {}
+            , {}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -189,7 +189,7 @@ router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
     //console.log(dataQuery)
 
     Group.find({$and:[{restaurant_Id:req.body.restaurant_Id},dataQuery]}
-            ,{_id:0, restaurant_Id:1, group:1, text:1, androidRtn:1}
+            , {_id:0, restaurant_Id:1, group:1, text:1, androidRtn:1}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -250,8 +250,8 @@ router.post('/restaurantMember', uploadsSignUp.single(), function(req, res){
     //sleep(500);
 
     Restaurant.find({_id:req.body.restaurant_Id}
-            ,{}
-            ,{}
+            , {}
+            , {}
             , function(err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
@@ -287,7 +287,8 @@ router.post('/mealLikeCount', uploadsSignUp.single(), function(req, res){
     sleep(10);
 
     Like.count({$and:[{meal_Id : req.body.meal_Id}
-                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
+              , {uniqueId: req.body.uniqueId}]}
+              , function (err, data) {
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
@@ -315,7 +316,8 @@ router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
     //console.log(req.body.uniqueId)
 
     Board.find({$and:[{restaurant_Id : req.body.restaurant_Id}
-                    ,{uniqueId: req.body.uniqueId}]}, function (err, data) {
+            , {uniqueId: req.body.uniqueId}]}
+            , function (err, data){
         if (err) {
             httpMsgs.show500(req, res, err);
         } else {
@@ -401,13 +403,13 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '저녁',        androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'division',       text: '사진식단',     androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '쌀밥',        androidRtn: "0"});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '콩밥',       androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '콩밥',        androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'stapleFood',     text: '짜장면',      androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '된장국',      androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '미역국',      androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'soup',           text: '소고기국',     androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김치',        androidRtn: "0"});
-                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '소고기',       androidRtn: "0"});
+                    bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '소고기',      androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '수육',        androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '김',          androidRtn: "0"});
                     bulk.insert( {restaurant_Id: restaurant_Id, group: 'sideDish',       text: '콩나물',       androidRtn: "0"});
@@ -589,7 +591,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
                 };
 
                 Restaurant.update({_id : req.body.restaurant_Id}
-                    , { $set : query }
+                    , {$set : query}
                     , function(err){
                         //로그인 msg 멘트 변경시 iOS 수정 필요
                         var msg = "회원 수정이 완료되었습니다.\n로그인 페이지로 이동합니다."
@@ -722,9 +724,9 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
                 };
             }
 
-            Meal.update({_id : req.body.meal_Id}, 
-                        { $set : query },
-            function(err){
+            Meal.update({_id : req.body.meal_Id}
+                    , { $set : query }
+                    , function(err){
                 //로그인 msg 멘트 변경시 iOS 수정 필요
                 var msg = "식단 저장이 완료되었습니다."
                 httpMsgs.sendMessageZeroFound(req, res, msg);
@@ -745,9 +747,9 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
         notice        : req.body.notice
     };
 
-    Restaurant.update({_id : req.body.restaurant_Id}, 
-                { $set : query },
-    function(err){
+    Restaurant.update({_id : req.body.restaurant_Id}
+                , {$set : query}
+                , function(err){
         //httpMsgs.sendNoDataFound(req, res);
         var msg = "저장 완료되었습니다."
         httpMsgs.sendMessageZeroFound(req, res, msg);
@@ -763,43 +765,42 @@ router.put('/mealLike', upload.single(), function(req, res){
     //console.log(req.body.meal_Id)
     
     Meal.findOne({_id : req.body.meal_Id}
-    , function(err, data){
+        , function(err, data){
+            if (data == null) {
+                var msg = "존재하지 않는 Oid 입니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            } else {
+                Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                            ,{uniqueId: req.body.uniqueId}]}
+                            ,function(err, data){
+                    //like    
+                    if (data == null) {
+                        // 신규 등록
+                        var like = new Like({
+                            restaurant_Id   : req.body.restaurant_Id,
+                            meal_Id         : req.body.meal_Id,
+                            uniqueId        : req.body.uniqueId,
+                            androidRtn      : '0',
+                        });
 
-        if (data == null) {
-            var msg = "존재하지 않는 Oid 입니다."
-            httpMsgs.sendMessageFound(req, res, msg);
-        } else {
-            Like.findOne({$and:[{meal_Id : req.body.meal_Id}
-                        ,{uniqueId: req.body.uniqueId}]}
-                        ,function(err, data){
-                //like    
-                if (data == null) {
-                    // 신규 등록
-                    var like = new Like({
-                        restaurant_Id   : req.body.restaurant_Id,
-                        meal_Id         : req.body.meal_Id,
-                        uniqueId        : req.body.uniqueId,
-                        androidRtn      : '0',
-                    });
-
-                    like.save(function(err){
-                        //console.log("save")
-                        //msg 멘트 변경시 iOS 수정 필요
-                        var msg = "맛있어요 설정되었습니다."
-                        httpMsgs.sendMessageZeroFound(req, res, msg);
-                    });
-                } else {
-                    Like.remove({$and:[{meal_Id : req.body.meal_Id}
-                                      ,{uniqueId: req.body.uniqueId}]}
-                        , function(err){
-                        //console.log("remove")
+                        like.save(function(err){
+                            //console.log("save")
                             //msg 멘트 변경시 iOS 수정 필요
-                            var msg = "맛있어요 해제되었습니다."
+                            var msg = "맛있어요 설정되었습니다."
                             httpMsgs.sendMessageZeroFound(req, res, msg);
-                    });
-                }
-            });            
-        }
+                        });
+                    } else {
+                        Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                                , {uniqueId: req.body.uniqueId}]}
+                                , function(err){
+                                //console.log("remove")
+                                //msg 멘트 변경시 iOS 수정 필요
+                                var msg = "맛있어요 해제되었습니다."
+                                httpMsgs.sendMessageZeroFound(req, res, msg);
+                        });
+                    }
+                });            
+            }
     });
 
 
