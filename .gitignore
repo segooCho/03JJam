@@ -8,6 +8,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# 보호문서 
+남은 작업*
+패스트캠프*
+
 # Runtime data
 pids
 *.pid
