@@ -761,48 +761,59 @@ router.put('/restaurantNoticeEdit', upload.single(), function(req, res){
 // upload.single() 이걸 사용해야지만 req.body 값이 들어 온다..!!! 왜???
 router.put('/mealLike', upload.single(), function(req, res){
     //sleep(500);
-
     //console.log(req.body.meal_Id)
-    
-    Meal.findOne({_id : req.body.meal_Id}
+
+    Restaurant.findOne({_id : req.body.restaurant_Id}
         , function(err, data){
-            if (data == null) {
-                var msg = "존재하지 않는 Oid 입니다."
-                httpMsgs.sendMessageFound(req, res, msg);
-            } else {
-                Like.findOne({$and:[{meal_Id : req.body.meal_Id}
-                            ,{uniqueId: req.body.uniqueId}]}
-                            ,function(err, data){
-                    //like    
-                    if (data == null) {
-                        // 신규 등록
-                        var like = new Like({
-                            restaurant_Id   : req.body.restaurant_Id,
-                            meal_Id         : req.body.meal_Id,
-                            uniqueId        : req.body.uniqueId,
-                            androidRtn      : '0',
-                        });
-
-                        like.save(function(err){
-                            //console.log("save")
-                            //msg 멘트 변경시 iOS 수정 필요
-                            var msg = "맛있어요 설정되었습니다."
-                            httpMsgs.sendMessageZeroFound(req, res, msg);
-                        });
+                if (data == null) {
+                    var msg = "존재하지 않는 Oid 입니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+                } else {
+                    if (data.certification == 'n') {
+                        var msg = "사업자 등록증 미인증 업체는 맛있어요 처리가 불가능합니다."
+                        httpMsgs.sendMessageFound(req, res, msg);
                     } else {
-                        Like.remove({$and:[{meal_Id : req.body.meal_Id}
-                                , {uniqueId: req.body.uniqueId}]}
-                                , function(err){
-                                //console.log("remove")
-                                //msg 멘트 변경시 iOS 수정 필요
-                                var msg = "맛있어요 해제되었습니다."
-                                httpMsgs.sendMessageZeroFound(req, res, msg);
-                        });
-                    }
-                });            
-            }
-    });
+                        Meal.findOne({_id : req.body.meal_Id}
+                            , function(err, data){
+                                if (data == null) {
+                                    var msg = "존재하지 않는 Oid 입니다."
+                                    httpMsgs.sendMessageFound(req, res, msg);
+                                } else {
+                                    Like.findOne({$and:[{meal_Id : req.body.meal_Id}
+                                                ,{uniqueId: req.body.uniqueId}]}
+                                                ,function(err, data){
+                                        //like    
+                                        if (data == null) {
+                                            // 신규 등록
+                                            var like = new Like({
+                                                restaurant_Id   : req.body.restaurant_Id,
+                                                meal_Id         : req.body.meal_Id,
+                                                uniqueId        : req.body.uniqueId,
+                                                androidRtn      : '0',
+                                            });
 
+                                            like.save(function(err){
+                                                //console.log("save")
+                                                //msg 멘트 변경시 iOS 수정 필요
+                                                var msg = "맛있어요 설정되었습니다."
+                                                httpMsgs.sendMessageZeroFound(req, res, msg);
+                                            });
+                                        } else {
+                                            Like.remove({$and:[{meal_Id : req.body.meal_Id}
+                                                    , {uniqueId: req.body.uniqueId}]}
+                                                    , function(err){
+                                                    //console.log("remove")
+                                                    //msg 멘트 변경시 iOS 수정 필요
+                                                    var msg = "맛있어요 해제되었습니다."
+                                                    httpMsgs.sendMessageZeroFound(req, res, msg);
+                                            });
+                                        }
+                                    });            
+                                }
+                        });        
+                    }
+                }
+    });
 
 });
 
