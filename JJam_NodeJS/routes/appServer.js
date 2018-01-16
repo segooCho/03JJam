@@ -324,7 +324,8 @@ router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
             if (data.length>0) {
                 httpMsgs.sendJson(req, res, data);      
             } else {
-                var msg = "정보가 없습니다."
+                //로그인 msg 멘트 변경시 iOS 수정 필요
+                var msg = "문의 내용이 없습니다."
                 httpMsgs.sendMessageFound(req, res, msg);
                 //httpMsgs.sendNoDataFound(req, res);
             }
