@@ -340,7 +340,7 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
     //sleep(500);
 
     //회원 가입 ID 확인 (회원 아이디 중복 확인용)
-    //console.log('req.body.id' , req.body.id); 
+    //console.log('req.body' , req.body); 
 
     Restaurant.find({id:req.body.id}
             , {}
@@ -349,14 +349,15 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
             httpMsgs.show500(req, res, err);
         } else {
             if (data.length>0) {
-                //console.log(req.file.filename);
+                //console.log(req.file.businessLicenseImage);
                 //파일 삭제                
-                if (req.file.filename != "") {
+                
+                if (req.file) {
                     //경로 주위 해야 함 
                     //임시 파일이 생성 됨으로 직접 경로를 설정 
                     fs.unlinkSync(uploadsSignUpDir + '/' + req.file.filename);
                 }
-
+                
                 var msg = "이미 존재하는 사용자ID 입니다.";
                 httpMsgs.sendMessageFound(req, res, msg);
             } else {
