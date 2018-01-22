@@ -12,6 +12,7 @@ var RestaurantSchema = new Schema({
     certification           : String,
     businessLicenseImage    : String,
     notice                  : String,
+    banner                  : String,
     androidRtn              : String,
     created_at : {
         type                : Date,

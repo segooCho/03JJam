@@ -77,6 +77,12 @@ Endpoint: http://127.0.0.1:3000/
         02.uniqueId                  :   Text =>     휴대전화 고유UUid
 
 
+/* POST : 식단 등록 카운터를 이용한 전면 배너 광고 처리  */
+/mealBannerCheck
+    Req.body.Parameter
+        01.restaurant_Id             :   Text =>     _id(restaurant_Id)
+
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */

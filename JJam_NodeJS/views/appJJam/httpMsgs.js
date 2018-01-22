@@ -44,6 +44,19 @@ exports.sendLikeCountFound = function (req, res, check, cnt) {
     res.end();
 };
 
+exports.sendMealBannerCheckFound = function (req, res, check) {
+    if (settings.httpMsgFormat === "HTML") {
+        res.writeHead(200,  { "Content-Type": "text/html" });
+        res.write("<html><head><title>" + check + "</title></head><body>" + check + "</body></html>")
+    }
+    else {
+        res.writeHead(200,  { "Content-Type": "application/json" });
+        res.write(JSON.stringify([{ androidRtn: '0' , bannerCheck: check}]));
+    }
+    res.end();
+};
+
+
 exports.sendMessageFound = function (req, res, msg) {
     if (settings.httpMsgFormat === "HTML") {
         res.writeHead(200,  { "Content-Type": "text/html" });

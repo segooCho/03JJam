@@ -138,20 +138,24 @@ router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
     var dataQuery2 = {};
     var msgSegmented = ""
     if (req.body.segmentedId == 0) {
-        dataQuery1 = {mealDate:{$eq:today}};                       //오늘
-        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$eq:today}};                            //오늘
+        dataQuery2 = {division:{$ne:'사진식단'}};                         //사진 식단 제외
+        dataSort = {"mealDate":1,"location":1,"sort":1,"division":1};   //sort
         msgSegmented = "오늘"
     } else if (req.body.segmentedId == 1) {
-        dataQuery1 = {mealDate:{$gt:today}};                       //계획
-        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$gt:today}};                            //계획
+        dataQuery2 = {division:{$ne:'사진식단'}};                         //사진 식단 제외
+        dataSort = {"mealDate":1,"location":1,"sort":1,"division":1};   //sort
         msgSegmented = "계획"
     } else if (req.body.segmentedId == 2) {
-        dataQuery1 = {mealDate:{$lt:today}};                       //과거
-        dataQuery2 = {division:{$ne:'사진식단'}};                    //sort
+        dataQuery1 = {mealDate:{$lt:today}};                            //과거
+        dataQuery2 = {division:{$ne:'사진식단'}};                         //사진 식단 제외
+        dataSort = {"mealDate":-1,"location":1,"sort":1,"division":1};  //sort
         msgSegmented = "과거"
     } else if (req.body.segmentedId == 3) {
-        dataQuery1 = {division:'사진식단'};                          //사진식단
-        dataQuery2 = {division:'사진식단'};                          //sort
+        dataQuery1 = {division:'사진식단'};                               //사진식단
+        dataQuery2 = {division:'사진식단'};                               //사진 식단 포함
+        dataSort = {"mealDate":-1,"location":1,"sort":1,"division":1};  //sort
         msgSegmented = "사진"
     }
     //console.log(dataQuery1);
@@ -172,8 +176,9 @@ router.post('/mealSearch', uploadsSignUp.single(), function(req, res){
             }
         }        
     })
-    .sort({"mealDate":1,"location":1,"sort":1,"division":1})    //-1:내림 차순, 1:오늘 차순
-    .limit(30);                                                  //제한 30
+    //.sort({"mealDate":1,"location":1,"sort":1,"division":1})    //-1:내림 차순, 1:오늘 차순
+    .sort(dataSort)                                               //-1:내림 차순, 1:오늘 차순
+    .limit(30);                                                   //제한 30
 
 });
 
@@ -203,7 +208,9 @@ router.post('/restaurantGroup', uploadsSignUp.single(), function(req, res){
                 httpMsgs.sendMessageFound(req, res, msg);
             }
         }        
-    });
+    })
+    .sort({"restaurant_Id":1,"group":1,"text":1});                                               //-1:내림 차순, 1:오늘 차순
+    
 });
 
 /* POST : 로그인 */
@@ -333,6 +340,29 @@ router.post('/boardSearch', uploadsSignUp.single(), function(req, res){
     });
 });
 
+
+/* POST : 식단 등록 카운터를 이용한 전면 배너 광고 처리  */
+router.post('/mealBannerCheck', uploadsSignUp.single(), function(req, res){
+    //sleep(500);
+    //console.log(req.body)
+
+    var divisionCnt = 5;
+
+    Meal.count({restaurant_Id: req.body.restaurant_Id}, function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data % divisionCnt == 0) {
+                //console.log("y")
+                httpMsgs.sendMealBannerCheckFound(req, res, "y");
+            } else {
+                //console.log("n")
+                httpMsgs.sendMealBannerCheckFound(req, res, "n");
+            }
+        }        
+    });
+});
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -377,6 +407,7 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
                     businessLicenseImage    : (req.file) ? req.file.filename : "",
                     certification           : 'n',
                     notice                  : "공지사항",
+                    banner                  : "n",
                     androidRtn              : '0',
                 });
 
