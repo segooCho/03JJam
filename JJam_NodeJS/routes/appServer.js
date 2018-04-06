@@ -8,6 +8,7 @@ var Group = require('../models/Group');                     //식당의 메뉴 �
 var Meal = require('../models/Meal');                       //식단 정보
 var Like = require('../models/Like');                       //맛있어요 정보
 var Board = require('../models/Board');                     //문의 & 식당 요청 게시판
+var Security = require('../models/Security');               //보안 정보
 
 
 // hash
@@ -346,7 +347,7 @@ router.post('/mealBannerCheck', uploadsSignUp.single(), function(req, res){
     //sleep(500);
     //console.log(req.body)
 
-    var divisionCnt = 5;
+    var divisionCnt = 2;
 
     Meal.count({restaurant_Id: req.body.restaurant_Id}, function (err, data) {
         if (err) {
@@ -361,6 +362,46 @@ router.post('/mealBannerCheck', uploadsSignUp.single(), function(req, res){
             }
         }        
     });
+});
+
+
+/* POST : 보안 정보 확인 Test  */
+router.post('/securityTest', uploadsSignUp.single(), function(req, res){
+    //sleep(500);
+    //console.log(req.body);
+
+    Security.find({type: req.body.type}
+        , {text:1, androidRtn:1}
+        , function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data.length>0) {
+                //보안 정보는 리턴 Count가 하나로 고정
+                //TODO :: crypto 처리
+                //var hash = crypto.createHash('sha256').update(req.body.password).digest('Hex');
+                var modelText = data[0].text;
+                var appText = req.body.text;
+
+                if (modelText != appText) {
+                    var msg = "보안 정보가 없습니다."
+                    httpMsgs.sendMessageFound(req, res, msg);
+                } else {
+                    var msg = "보안 접근 완료!"
+                    httpMsgs.sendMessageFound(req, res, msg);
+                }
+
+            } else {
+                //console.log(data)
+                var msg = "보안 정보가 없습니다."
+                httpMsgs.sendMessageFound(req, res, msg);
+            }
+        }        
+    });
+
+
+
+
 });
 
 /********************************  등록  ***********************************/
@@ -572,6 +613,151 @@ router.post('/boardWrite', upload.single(), function(req, res){
     });
 });
 
+
+
+/* POST :  보안 정보 등록 */
+/*
+router.post('/securityWrite', upload.single(), function(req, res){
+    //sleep(500);
+
+    var security = new Security({
+        type            : req.body.type,
+        text            : req.body.text,
+        androidRtn      : '0',
+    });
+
+    security.save(function(err){
+        //msg 멘트 변경시 iOS 수정 필요
+        var msg = "저장이 완료되었습니다."
+        httpMsgs.sendMessageZeroFound(req, res, msg);
+    });
+});
+*/
+
+
+/* POST :  전체 모델 생성 */
+/*
+router.post('/allModelCreate', upload.single(), function(req, res){
+    //sleep(500);
+
+    var managerNotice = new ManagerNotice({
+        division        : 'Create',
+        text            : 'Create',
+        androidRtn      : '0',
+    });
+
+    managerNotice.save(function(err){
+    });
+
+
+    var restaurant = new Restaurant({
+        id                      : 'Create',
+        password                : 'Create',
+        businessNumber          : 'Create',
+        companyName             : 'Create',
+        address                 : 'Create',
+        contactNumber           : 'Create',
+        representative          : 'Create',
+        businessLicenseImage    : '',
+        certification           : 'n',
+        notice                  : "공지사항",
+        banner                  : "n",
+        androidRtn              : '0',
+    });
+
+    restaurant.save(function(err){
+    });
+
+
+    var group = new Group({
+        restaurant_Id           : 'Create',
+        group                   : 'Create',
+        text                    : 'Create',
+        androidRtn              : '0',
+    });
+
+    group.save(function(err){
+    });
+
+
+
+    var meal = new Meal({
+        restaurant_Id   : 'Create',
+        mealDate        : 'Create',
+        mealDateLabel   : 'Create',
+        location        : 'Create',
+        division        : 'Create',
+        sort            : 'Create',
+        stapleFood1     : 'Create',
+        stapleFood2     : 'Create',   
+        stapleFood3     : 'Create',
+        soup1           : 'Create',
+        soup2           : 'Create',
+        soup3           : 'Create',
+        sideDish1       : 'Create',
+        sideDish2       : 'Create',
+        sideDish3       : 'Create',
+        sideDish4       : 'Create',
+        sideDish5       : 'Create',
+        sideDish6       : 'Create',
+        sideDish7       : 'Create',
+        sideDish8       : 'Create',
+        sideDish9       : 'Create',
+        dessert1        : 'Create',
+        dessert2        : 'Create',
+        dessert3        : 'Create',
+        dessert4        : 'Create',
+        dessert5        : 'Create',
+        remarks         : 'Create',
+        foodImage       : '',
+        androidRtn      : "0"
+    });
+
+    meal.save(function(err){
+    });
+
+
+    var like = new Like({
+        restaurant_Id   : 'Create',
+        meal_Id         : 'Create',
+        uniqueId        : 'Create',
+        androidRtn      : '0',
+    });
+
+    like.save(function(err){
+    });
+
+
+
+    var board = new Board({
+        restaurant_Id   : 'Create',
+        uniqueId        : 'Create',
+        division        : 'Create',
+        title           : 'Create',
+        contents        : 'Create',
+        answer          : '',
+        androidRtn      : '0',
+    });
+
+    board.save(function(err){
+    });
+
+
+
+    var security = new Security({
+        type            : 'Create',
+        text            : 'Create',
+        androidRtn      : '0',
+    });
+
+    security.save(function(err){
+    });
+
+    var msg = "저장이 완료되었습니다."
+    httpMsgs.sendMessageZeroFound(req, res, msg);
+
+});
+*/
 
 /********************************  수정  ***********************************/
 
@@ -895,7 +1081,6 @@ router.put('/boardAnswer', upload.single(), function(req, res){
 /* POST : 관리자 공지사항 등록 */
 router.post('/managerNoticeInit', upload.single(), function(req, res){
     //sleep(500);
-
     var managerNotice = new ManagerNotice({
         division        : req.body.division,
         text            : req.body.text,
@@ -907,7 +1092,6 @@ router.post('/managerNoticeInit', upload.single(), function(req, res){
         var msg = "저장이 완료되었습니다."
         httpMsgs.sendMessageZeroFound(req, res, msg);
     });
-
 });
 
 

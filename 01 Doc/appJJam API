@@ -83,6 +83,13 @@ Endpoint: http://127.0.0.1:3000/
         01.restaurant_Id             :   Text =>     _id(restaurant_Id)
 
 
+/* POST :  보안 정보 확인 Test */
+/securityTest
+    Req.body.Parameter
+        01.type                     :   Text =>     보안 유형
+        02.text                     :   Text =>     Text
+
+
 /********************************  등록  ***********************************/
 
 /* POST : 회원 가입 */
@@ -142,6 +149,7 @@ Endpoint: http://127.0.0.1:3000/
                                                      -dessert      : 없음(필수) 후식
                                                      *클라이언트에서 중복을 Check해서 전송한다.
 
+
 /* POST :  문의 또는 식당요청 게시판 */
 /boardWrite
     Req.body.Parameter
@@ -152,6 +160,7 @@ Endpoint: http://127.0.0.1:3000/
         05.contents                  :   Text =>     문의 / 식당 요청 내용
 
 
+
 /* POST :  문의 또는 식당요청 게시판 */
 /boardWrite
     Req.body.Parameter
@@ -160,6 +169,18 @@ Endpoint: http://127.0.0.1:3000/
         03.division                  :   Text =>     식당 요청 : 0, 문의 : 1
         04.title                     :   Text =>     제목
         05.contents                  :   Text =>     문의 / 식당 요청 내용
+
+
+
+/* POST :  보안 정보 등록 */
+/securityWrite
+    Req.body.Parameter
+        01.type                     :   Text =>     보안 유형
+        02.text                     :   Text =>     Text
+
+
+/* POST :  전체 Model 생성 (최초 환경 설정 시 사용)*/
+/allModelCreate
 
 
 /********************************  수정  ***********************************/
