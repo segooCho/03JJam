@@ -15,6 +15,8 @@ var Security = require('../models/Security');               //보안 정보
 var crypto = require('crypto');
 // sleep
 var sleep = require('system-sleep');
+// dateFormat
+var dateFormat = require('dateformat');
 // return Page
 var httpMsgs = require('../views/appJJam/httpMsgs.js');
 
@@ -84,8 +86,7 @@ router.post('/restaurantSearch', uploadsSignUp.single(), function(req, res){
     //console.log(req.body.searchText);
     //var testJson;
 
-    Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}}
-            , {address:{$regex:req.body.searchText}}]}
+    Restaurant.find({$or:[{companyName:{$regex:req.body.searchText}}, {address:{$regex:req.body.searchText}}]}
             , {_id:1, companyName:1, certification:1, address:1, contactNumber:1, representative:1, androidRtn:1}
             , function(err, data){
         if (err) {
@@ -347,6 +348,31 @@ router.post('/mealBannerCheck', uploadsSignUp.single(), function(req, res){
     //sleep(500);
     //console.log(req.body)
 
+    //식당별 등록 요일 기준으로 광고 표시
+    //추후 식당에 따라 요일 변경이 가능함
+    var now = new Date();
+    var day = dateFormat(now,"ddd").toString();
+    //console.log(day);
+
+    Restaurant.count({$and:[{_id: req.body.restaurant_Id}
+                     ,{banner: {$regex:day}}
+                     ]}
+                , function (err, data) {
+        if (err) {
+            httpMsgs.show500(req, res, err);
+        } else {
+            if (data > 0) {
+                httpMsgs.sendMealBannerCheckFound(req, res, "y");
+            } else {
+                httpMsgs.sendMealBannerCheckFound(req, res, "n");
+            }
+        }        
+    });
+
+
+
+    /*
+    // 등록 건수 기준으로 광고 표시
     var divisionCnt = 2;
 
     Meal.count({restaurant_Id: req.body.restaurant_Id}, function (err, data) {
@@ -362,6 +388,8 @@ router.post('/mealBannerCheck', uploadsSignUp.single(), function(req, res){
             }
         }        
     });
+    */
+
 });
 
 
@@ -448,7 +476,9 @@ router.post('/restaurantSignUp', uploadsSignUp.single('businessLicenseImage'), f
                     businessLicenseImage    : (req.file) ? req.file.filename : "",
                     certification           : 'n',
                     notice                  : "공지사항",
-                    banner                  : "n",
+                    banner                  : "Mon Wed Fri",
+                    //banner                  : "Mon Tue Wed Thu Fri Sat Sun",
+                    //banner                  : "y",
                     androidRtn              : '0',
                 });
 
@@ -759,6 +789,7 @@ router.post('/allModelCreate', upload.single(), function(req, res){
 });
 */
 
+
 /********************************  수정  ***********************************/
 
 /* POST : 회원 수정 */
@@ -790,7 +821,7 @@ router.post('/restaurantEdit', uploadsSignUp.single('businessLicenseImage'), fun
             }
 
             
-            if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
+            if(req.file || req.body.editImage == 'NoImageFound.png'){  //요청중에 파일이 존재 할시 기존 businessLicenseImage 지운다.
                 if (data.businessLicenseImage != "") {
                     //console.log('=> 파일 삭제');
                     fs.unlinkSync(uploadsSignUpDir + '/' + data.businessLicenseImage);
@@ -873,7 +904,7 @@ router.post('/mealEdit', upload.single('foodImage'), function(req, res){
             var msg = "존재하지 않는 Oid 입니다."
             httpMsgs.sendMessageFound(req, res, msg);
         } else {
-            if(req.file || req.body.editImage == 'NoImageFound.jpg'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
+            if(req.file || req.body.editImage == 'NoImageFound.png'){  //요청중에 파일이 존재 할시 기존 foodImage 지운다.
                 if (data.foodImage != "") {
                     //console.log('=> 파일 삭제');
                     fs.unlinkSync(uploadDir + '/' + data.foodImage);

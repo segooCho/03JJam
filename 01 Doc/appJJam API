@@ -105,6 +105,7 @@ Endpoint: http://127.0.0.1:3000/
         08.businessLicenseImage      :   File =>     사업자 등록증 사진 (600 x 600 사이즈)
       =>certification   : 서버에서 처리 'n'
       =>notice          : 서버에서 처리 '공지사항'
+      =>banner          : "Mon Wed Fri" / "Mon Tue Wed Thu Fri Sat Sun"
 
 
 

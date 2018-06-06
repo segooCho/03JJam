@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -8,7 +7,8 @@ var bodyParser = require('body-parser');
 // MongoDB 연결 Start
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-var autoIncrement = require('mongoose-auto-increment');
+//이거 왜 오류 나는지 모르겠음 설치 문제???
+//var autoIncrement = require('mongoose-auto-increment');
 
 var db = mongoose.connection;
 db.on( 'error' , console.error );
@@ -17,7 +17,7 @@ db.once( 'open' , function(){
 });
 
 var connect = mongoose.connect('mongodb://127.0.0.1/JJam'); 
-autoIncrement.initialize(connect);
+//autoIncrement.initialize(connect);
 // MongoDB 연결 End
 
 var appServer = require('./routes/appServer');
@@ -28,8 +28,6 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

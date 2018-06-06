@@ -41,7 +41,11 @@ npm -g install express-generator
 1. npm install crypto
 
 
-* sleep (Test 용)
+* dateformat(광고 요일 처리)
+1. npm install dateformat
+
+
+* sleep (Test 용이지만 소스에서 사용하는 경우가 있어 서버에도 설치)
 npm install system-sleep
 
 
@@ -58,8 +62,10 @@ express
 npm install
 npm install --save mongodb
 npm install --save mongoose
-npm install --save mongoose-auto-increment
+npm install --save mongoose-auto-increment => 오류로 사용 안함
 npm install nodemon
 npm install -save multer
 npm install crypto
+npm install system-sleep
+npm install dateformat
 
